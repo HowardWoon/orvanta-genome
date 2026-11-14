@@ -52,7 +52,11 @@ def find_browser() -> tuple[str, list[str]] | None:
     exe = next((p for p in cands if p and Path(p).exists()), None)
     if not exe:
         return None
-    extra = ["--no-sandbox"] if sys.platform != "win32" and hasattr(os, "geteuid") and os.geteuid() == 0 else []   # Colab runs as root
+    extra = []
+    if sys.platform != "win32":
+        extra.append("--disable-dev-shm-usage")          # containers (Colab) have a tiny /dev/shm; Chrome crashes without this
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            extra.append("--no-sandbox")                 # Colab runs as root
     return exe, extra
 
 
