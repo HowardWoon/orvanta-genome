@@ -1,0 +1,3 @@
+# V5 functional QA
+
+Executed results: `FINAL_RELEASE_QA.md` (90 / 90 tests). Interactions covered by browser tests: navigation and drawer, direct URLs, refresh, back/forward, explorer filters/compare/reset/export state, simulator sliders + pin/compare/export, sensitivity slider recompute, atlas zoom/trace/focus, rule search, Rule Builder (support, reversal, categorical), Forensic Replay (rule/side switching, exact C2 rows), ledger search, genealogy, blueprint filter, guided tour (stages, refresh, back). Numerical checks: explorer counts vs Python, simulator Direct vs observed, sensitivity 1 − q, replay C2 vs validator, JS ↔ Python rule parity.

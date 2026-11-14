@@ -1,0 +1,30 @@
+# --- dataset: never committed (5 GB, and the competition rules do not allow redistributing it) ---
+swift_umdac_datathon_2026_fictitious_payment_data.csv
+*.csv.gz
+data/processed/
+*.parquet
+*.duckdb
+*.db
+
+# --- organiser documents and team-only files (keep out of the repository) ---
+Datathon 2026 *.pdf
+Universiti Malaya UMDAC Datathon 2026 - Swift Case Study Preliminary Round.pdf
+UMDAC 2026 Nai Long .pdf
+
+# --- build artefacts and archives ---
+*.zip
+backups/
+web/dist/
+outputs/pdf_build/
+outputs/logs/
+outputs/*.log
+notebooks/orvanta/
+
+# --- local tooling, caches and secrets ---
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.vercel/
+.env*
+.claude/

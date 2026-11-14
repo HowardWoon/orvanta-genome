@@ -1,0 +1,338 @@
+{
+ "generated": "2026-11-14T17:02:45",
+ "raw": {
+  "path": "swift_umdac_datathon_2026_fictitious_payment_data.csv",
+  "bytes": 4952194328,
+  "rows": 10000000,
+  "columns": 21,
+  "note": "raw file is read-only; fingerprinted by size + verified row count (hashing 4.6 GB on every run is avoided)"
+ },
+ "artefacts": [
+  {
+   "path": "data/processed/payments.parquet",
+   "producer": "src.ingestion",
+   "inputs": [
+    "raw CSV"
+   ],
+   "bytes": 1269596649,
+   "sha256": "f9d3bd4e4d1b9be83753db5b7bfe15a96247e404b8fe781d604fc9c1e29ca169",
+   "modified": "2026-11-13T20:04:43",
+   "rows": 10000000,
+   "columns": 20
+  },
+  {
+   "path": "data/processed/slim.parquet",
+   "producer": "src.ingestion",
+   "inputs": [
+    "payments.parquet"
+   ],
+   "bytes": 480612154,
+   "sha256": "e922edab57e5ac13b315404f9aca53fd7c18da0d8b1464e1818560fec8aeefa5",
+   "modified": "2026-11-13T20:08:37",
+   "rows": 10000000,
+   "columns": 32
+  },
+  {
+   "path": "outputs/evidence/graph.json",
+   "producer": "src.graph",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 122087,
+   "sha256": "9f70a3c6a296a45b7a8f0e122971404a8f0f98662c47e1efde9407fc229d5510",
+   "modified": "2026-11-14T16:45:11"
+  },
+  {
+   "path": "outputs/evidence/stats.json",
+   "producer": "src.stats",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 15910,
+   "sha256": "a35c40aa42e8608e9a8e1290c06722d930722b94fdeecc1bafbfed70d0628106",
+   "modified": "2026-11-14T16:45:39"
+  },
+  {
+   "path": "outputs/evidence/discovery.json",
+   "producer": "src.discovery",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 99550,
+   "sha256": "e4f33bd6455b32888f9088a0326017e3383cdbbfcbbcf5df9674bdac7095f600",
+   "modified": "2026-11-14T16:50:54"
+  },
+  {
+   "path": "outputs/evidence/forensics.json",
+   "producer": "src.forensics",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 18720,
+   "sha256": "93cbc782944ee6b232897d2580a8236ebeb14c2b89c6e6bca6c9ec021eef855a",
+   "modified": "2026-11-14T16:51:45"
+  },
+  {
+   "path": "outputs/evidence/validation.json",
+   "producer": "src.validation",
+   "inputs": [
+    "slim.parquet",
+    "graph.json",
+    "stats.json",
+    "forensics.json"
+   ],
+   "bytes": 33296,
+   "sha256": "606a12a970bd534454c5a751e33de8b26e1400ed963a6c67943b538ebfc27763",
+   "modified": "2026-11-14T17:00:29"
+  },
+  {
+   "path": "outputs/evidence/evidence.json",
+   "producer": "src.evidence",
+   "inputs": [
+    "slim.parquet",
+    "payments.parquet"
+   ],
+   "bytes": 130547,
+   "sha256": "e1bc03904229154812fdc4703b668ffd7d84d226179102e001a86e89c4866eee",
+   "modified": "2026-11-14T17:02:34"
+  },
+  {
+   "path": "outputs/evidence/register.json",
+   "producer": "src.register",
+   "inputs": [
+    "validation.json"
+   ],
+   "bytes": 65694,
+   "sha256": "ac091999649e7a8136e614995bb7b840fe2286b5c75c6e1618155a0907f0b91e",
+   "modified": "2026-11-14T17:02:42"
+  },
+  {
+   "path": "outputs/evidence/atlas.json",
+   "producer": "src.atlas",
+   "inputs": [
+    "validation.json",
+    "forensics.json",
+    "graph.json"
+   ],
+   "bytes": 10208,
+   "sha256": "05263c0ce55be7fad37eecbbdfe456870315333fa4c7aabf077908fd06dac0f5",
+   "modified": "2026-11-14T17:02:43"
+  },
+  {
+   "path": "outputs/tables/cube_main.parquet",
+   "producer": "src.cube",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 635224,
+   "sha256": "0e2327559d618613225bba97cdd281955e33b9f97464750e4c7ea6c5ad98f527",
+   "modified": "2026-11-14T17:02:36",
+   "rows": 17648,
+   "columns": 16
+  },
+  {
+   "path": "outputs/tables/cube_amount.parquet",
+   "producer": "src.cube",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 924168,
+   "sha256": "db7f66bde70b610fd53e2dc741fdc46b83e3bb528bcd6b9a845c122dec97df90",
+   "modified": "2026-11-14T17:02:37",
+   "rows": 254829,
+   "columns": 8
+  },
+  {
+   "path": "outputs/tables/cube_duration.parquet",
+   "producer": "src.cube",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 506283,
+   "sha256": "5402eae4c46cc47c67d789349a4d8065c0210428bef7044d859fb7c42d10c427",
+   "modified": "2026-11-14T17:02:39",
+   "rows": 141367,
+   "columns": 8
+  },
+  {
+   "path": "outputs/tables/cube_route.parquet",
+   "producer": "src.cube",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 642719,
+   "sha256": "179a2d031de3b55a6d692a158ca4e3c25a85c37733e7cc59009f16b97e21141c",
+   "modified": "2026-11-14T17:02:40",
+   "rows": 172736,
+   "columns": 10
+  },
+  {
+   "path": "outputs/tables/cube_hour.parquet",
+   "producer": "src.cube",
+   "inputs": [
+    "slim.parquet"
+   ],
+   "bytes": 964784,
+   "sha256": "7874cc8294ddde4bd9bc80d170ab33e2784062fe81d51ced7064bc0b040b7d80",
+   "modified": "2026-11-14T17:02:42",
+   "rows": 272119,
+   "columns": 8
+  }
+ ],
+ "schema_contract": [
+  {
+   "column": "rid",
+   "expected": "BIGINT",
+   "actual": "BIGINT",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "epoch",
+   "expected": "BIGINT",
+   "actual": "BIGINT",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "cur",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "amt",
+   "expected": "DOUBLE",
+   "actual": "DOUBLE",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "dur",
+   "expected": "INTEGER",
+   "actual": "INTEGER",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "fx",
+   "expected": "INTEGER",
+   "actual": "INTEGER",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "pc",
+   "expected": "INTEGER",
+   "actual": "INTEGER",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "obic",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "bbic",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "path",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "cont",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "ttype",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "otype",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "btype",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": false,
+   "nulls": 0,
+   "ok": true
+  },
+  {
+   "column": "anom",
+   "expected": "VARCHAR",
+   "actual": "VARCHAR",
+   "nullable": true,
+   "nulls": 9992994,
+   "ok": true
+  }
+ ],
+ "contract_ok": true,
+ "environment": {
+  "python": "3.12.3",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+   "duckdb": "1.5.2",
+   "pandas": "3.1.0",
+   "numpy": "2.4.6",
+   "scipy": "1.17.1",
+   "scikit-learn": "1.8.0",
+   "matplotlib": "3.10.9",
+   "streamlit": "1.57.0",
+   "altair": "6.1.0",
+   "pyarrow": "24.0.0",
+   "pypdf": "6.19.0",
+   "pytest": "9.1.1"
+  }
+ },
+ "pipeline": [
+  "src.ingestion",
+  "src.graph",
+  "src.stats",
+  "src.discovery",
+  "src.forensics",
+  "src.validation",
+  "src.evidence",
+  "src.cube",
+  "src.register",
+  "src.atlas",
+  "src.lineage",
+  "src.charts",
+  "src.reporting",
+  "src.web"
+ ]
+}

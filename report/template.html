@@ -1,0 +1,469 @@
+<title>Swift Generator Casebook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single reading column (casebook) with a sticky rule index; each feature group = one "case file" with rule cards + evidence charts */
+:root{
+  --bg:#f6f7f9; --paper:#ffffff; --ink:#111827; --ink2:#4b5563; --muted:#6b7280; --line:#e3e6eb;
+  --accent:#1f5fbf; --accent-soft:#e7effb;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100;
+  --exact:#0f7b45; --exact-bg:#e3f4ea; --strong:#1f5fbf; --strong-bg:#e7effb; --partial:#a35c00; --partial-bg:#fbf0dc; --open:#9b2c2c; --open-bg:#fae6e6;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1216; --paper:#171b21; --ink:#eef0f3; --ink2:#c2c8d0; --muted:#8e97a3; --line:#2a3039;
+  --accent:#6ea4ef; --accent-soft:#1b2a40;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --exact:#5fd394; --exact-bg:#143224; --strong:#7fb0f2; --strong-bg:#172a43; --partial:#e5ad5c; --partial-bg:#3a2a12; --open:#f08b8b; --open-bg:#3c1a1a;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1216; --paper:#171b21; --ink:#eef0f3; --ink2:#c2c8d0; --muted:#8e97a3; --line:#2a3039;
+  --accent:#6ea4ef; --accent-soft:#1b2a40;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500;
+  --exact:#5fd394; --exact-bg:#143224; --strong:#7fb0f2; --strong-bg:#172a43; --partial:#e5ad5c; --partial-bg:#3a2a12; --open:#f08b8b; --open-bg:#3c1a1a;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.6;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-block:32px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:clamp(23px,3.2vw,30px);font-weight:700}
+h3{font-size:18px;font-weight:600}
+p{margin:0;max-width:72ch}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:17px;color:var(--ink2);max-width:70ch}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+header.top{display:grid;gap:14px;padding-bottom:26px;border-bottom:1px solid var(--line)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.score{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:6px}
+.score div{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.score b{display:block;font-family:var(--f-display);font-size:26px;font-variant-numeric:tabular-nums}
+.score span{font-size:12.5px;color:var(--muted)}
+nav.idx{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin:0 0 8px;padding:10px 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+nav.idx a{flex:none;font-family:var(--f-mono);font-size:12.5px;color:var(--ink2);text-decoration:none;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--paper)}
+nav.idx a:hover,nav.idx a:focus-visible{border-color:var(--accent);color:var(--accent);outline:none}
+section{padding-top:40px;display:grid;gap:18px}
+.sechead{display:grid;gap:6px}
+.rules{display:grid;gap:12px}
+.rule{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:8px}
+.rule .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.rid{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.chip{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;font-weight:500}
+.c-exact{color:var(--exact);background:var(--exact-bg)} .c-strong{color:var(--strong);background:var(--strong-bg)}
+.c-partial{color:var(--partial);background:var(--partial-bg)} .c-open{color:var(--open);background:var(--open-bg)}
+.formula{font-family:var(--f-mono);font-size:13.5px;background:var(--accent-soft);color:var(--ink);border-radius:6px;padding:8px 10px;overflow-x:auto;white-space:pre-wrap}
+.why{font-size:14.5px;color:var(--ink2)}
+.why b{color:var(--ink);font-weight:600}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.fig{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 14px 10px;display:grid;gap:8px;min-width:0}
+.fig h4{margin:0;font-family:var(--f-body);font-size:14px;font-weight:600}
+.fig .cap{font-size:12.5px;color:var(--muted)}
+.cv{position:relative;height:260px;width:100%}
+.cv.tall{height:330px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.tbl{overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:10px}
+.callout{border-left:3px solid var(--accent);padding:4px 0 4px 14px;color:var(--ink2);max-width:75ch}
+ul.tight{margin:0;padding-left:20px;display:grid;gap:4px}
+.lens{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.lens div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px}
+.lens h3{font-size:16px}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">UMDAC Datathon 2026 · Swift case · Team Nai Long · working analysis</div>
+  <h1>How the Swift payment generator works, rule by rule</h1>
+  <p class="lede">We profiled all 10,000,000 synthetic payments (30 Apr – 31 Jul 2023) and reverse-engineered the generating logic. Some rules reproduce the data exactly, some are strong statistical fits, and a few stay open. Each rule below gives its condition, effect and scope, the chart or calculation behind it, a real-world reading, and how far to trust it.</p>
+  <div class="meta"><span>Deadline: 19 Nov 2026, 12:00 MYT</span><span>Deliverables: 5–15 dashboard pages + 10–20 slides (PDF)</span><span>Source: provided dataset only</span></div>
+  <div class="score" id="score"></div>
+</header>
+
+<nav class="idx" aria-label="Sections">
+  <a href="#brief">Brief &amp; scoring</a><a href="#integrity">Data integrity</a><a href="#time">Time</a><a href="#currency">Currency &amp; FX</a><a href="#routing">Routing</a><a href="#duration">Duration</a><a href="#amount">Amounts</a><a href="#parties">Parties &amp; text</a><a href="#anomaly">Anomalies</a><a href="#open">Open questions</a><a href="#lenses">Lenses</a><a href="#plan">Submission plan</a>
+</nav>
+
+<section id="brief">
+  <div class="sechead"><div class="eyebrow">00 · What is being judged</div><h2>The task is to reconstruct causal rules, not to describe the data</h2></div>
+  <p>Swift asks us to recover the business rules used to build the dataset. The data is a directed temporal pseudograph of banks and parties, flattened into a table. Judges reward precise rules (condition → effect → size → scope), causal checks over plain correlation, and honest partial or negative results. A rule marked uncertain loses fewer marks than a wrong one stated with confidence.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Rubric block</th><th>Weight</th><th>What earns top marks</th><th>How this casebook answers it</th></tr></thead>
+    <tbody>
+      <tr><td>Insight quality</td><td>45%</td><td>Testable hypotheses; rules precise enough to reproduce the data; tested alternatives; correctness vs reference</td><td>Every rule has a formula, a match rate or effect size, and a confidence chip</td></tr>
+      <tr><td>Evidence, method, integrity</td><td>23%</td><td>Issues log; every claim traceable to a chart; simple, justified method; tools disclosed</td><td>Issues log in §01; each rule links to a chart; scripts listed in the footer</td></tr>
+      <tr><td>Communication</td><td>20%</td><td>Headline-first slides; dashboards readable alone; takeaway titles</td><td>Submission plan in §11 maps one dashboard page and one slide to each group</td></tr>
+      <tr><td>Economic reasoning</td><td>12%</td><td>Plausible mechanism per rule; alternatives considered; observation kept apart from interpretation</td><td>Each card separates <b>Observed</b> from <b>Reading</b></td></tr>
+    </tbody></table></div>
+</section>
+
+<section id="integrity">
+  <div class="sechead"><div class="eyebrow">01 · Data preparation</div><h2>Issues log: nothing was deleted, eight issues were handled</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Issue found</th><th>Scale</th><th>Decision</th><th>Effect on results</th></tr></thead>
+    <tbody>
+      <tr><td>Multi-line quoted text fields (addresses with line breaks)</td><td>All rows</td><td>Parsed as RFC-4180 CSV in DuckDB; row count verified at 10,000,000</td><td>None, and it prevents silent row splits</td></tr>
+      <tr><td><code>DISCLAIMER</code> column filled only on row 1</td><td>1 row</td><td>Column dropped; the row is kept</td><td>None</td></tr>
+      <tr><td><code>ANOMALY_TYPE</code> empty for normal rows</td><td>9,992,994 rows (99.93%)</td><td>Empty read as "normal", not as missing</td><td>Anomaly base rate is 0.07%</td></tr>
+      <tr><td>Partial first and last day (30 Apr from 11:22 UTC, 31 Jul to 09:56 UTC)</td><td>2 days</td><td>Excluded from weekday and weekly-level estimates only</td><td>Weekly-level chart starts on 1 May</td></tr>
+      <tr><td>Country token absent from party details</td><td>~39% of each side</td><td>Country taken from the BIC (chars 5–6); the address country is analysed only where present</td><td>Address-country findings use the 61% subset</td></tr>
+      <tr><td>Hidden path hops (<code>...</code>)</td><td>7.7% of rows</td><td>Kept; hops counted as known BICs only</td><td>Matches <code>PARTICIPANT_COUNT</code> exactly</td></tr>
+      <tr><td>Extreme amounts (max $15.7bn)</td><td>Long right tail</td><td>No capping; analysis done on ln(amount)</td><td>Means are not used for rules; medians and log-means are</td></tr>
+      <tr><td>Detail text over the MT 4×35 limit</td><td>0.17% of rows have more than 4 body lines</td><td>Kept and flagged as a generator quirk</td><td>None</td></tr>
+    </tbody></table></div>
+  <p class="callout">Privacy and representativeness: every value is synthetic (Faker and NumPy, per the disclaimer). Country sizes, populations and name origins are randomised on purpose, so country-level figures describe the generator, not the real world. Raw records are not reproduced anywhere in this document.</p>
+</section>
+
+<section id="time">
+  <div class="sechead"><div class="eyebrow">02 · Feature group: time (EPOCH_SECONDS)</div><h2>Payments follow the sender's local office clock, scaled by a global weekly multiplier</h2></div>
+  <div class="rules">
+    <div class="rule"><div class="row"><span class="rid">T1</span><h3>Intraday profile runs on the sending bank's local time</h3><span class="chip c-exact">Exact</span></div>
+      <div class="formula">local_hour = UTC_hour + offset(country of ORDERING_BIC8)
+volume ramps at 07:00 local, plateaus 07–20h with peaks at 07h and 16–18h, and drops to ~1%/h at 01–05h</div>
+      <p class="why"><b>Observed:</b> In UTC, every country's profile is the same curve shifted in time. Aligning each country to GB recovers whole-hour offsets that match time zones (US −5, DE +1, CN +8, JP +9). <b>Reading:</b> people and back offices start payments during their working day, so cut-off-driven traffic clusters after opening and before end of day.</p></div>
+    <div class="rule"><div class="row"><span class="rid">T2</span><h3>Offsets are frozen at January (no daylight saving)</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">offset = UTC offset on a northern-winter date: US −5 (EST), GB 0 (GMT), DE +1 (CET), AU +11 (AEDT), NZ +13 (NZDT)</div>
+      <p class="why"><b>Observed:</b> In May–July, real offsets would be US −4, GB +1, AU +10. The data shows the winter values in the north and the summer values in the south. <b>Reading:</b> a generator artefact (offsets computed once at a fixed date). It is a checkable, non-obvious rule, and it changes local hours by one hour for DST countries.</p></div>
+    <div class="rule"><div class="row"><span class="rid">T3</span><h3>One weekday shape everywhere: weekends at roughly 20–35% of a weekday</h3><span class="chip c-exact">Exact</span></div>
+      <div class="formula">local weekday share: Mon 18.9% · Tue 17.0% · Wed 17.0% · Thu 18.0% · Fri 18.9% · Sat 3.6% · Sun 6.5%
+(identical within ±0.5pt across all 60+ countries, including Gulf and Israeli banks)</div>
+      <p class="why"><b>Observed:</b> the shape does not depend on the sending country. Sunday is busier than Saturday everywhere. <b>Rejected:</b> "Friday–Saturday weekend in Middle-East countries" (AE, SA, IL look identical to US). <b>Reading:</b> batch submission before the Monday window. Local weekend customs were not modelled.</p></div>
+    <div class="rule"><div class="row"><span class="rid">T4</span><h3>Weekly volume is a global step multiplier; nothing else moves with it</h3><span class="chip c-partial">Partial</span></div>
+      <div class="formula">weekly volume ≈ base × {1.5, 1.0, 1.0, 1.7, 1.7, 1.5, 1.7, 2.4, 1.9, 1.0, 1.2, 1.5, 1.9} (weeks from 1 May)
+all countries move together (±5%); amounts, party mix, routing and duration stay flat across weeks</div>
+      <p class="why"><b>Observed:</b> the step levels are shared by every country, and the weekday shape inside each week is unchanged. <b>Not explained:</b> why these weeks. Peaks in late May, the week of 19 June (2.4×) and late July hint at month and quarter-end flows, but 1–7 May is also high, so we mark the cause as uncertain.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="fig"><h4>Daily volume moves in week-long steps, with the same weekday shape inside each week</h4><div class="cv"><canvas id="c_daily"></canvas></div><div class="cap">Payments per UTC day. Weekend days in orange.</div></div>
+    <div class="fig"><h4>In local time, businesses and consumers share one office-hours curve</h4><div class="cv"><canvas id="c_lhour"></canvas></div><div class="cap">Share of each sender type's payments by local hour (country offset applied).</div></div>
+  </div>
+</section>
+
+<section id="currency">
+  <div class="sechead"><div class="eyebrow">03 · Feature group: currency &amp; FX (CURRENCY_CODE, CURRENCY_CONVERSION_COUNT)</div><h2>Senders pay in their home currency; FX counts every currency border along the route</h2></div>
+  <div class="rules">
+    <div class="rule"><div class="row"><span class="rid">C1</span><h3>Payment currency is the sending bank's home currency about 89% of the time</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">P(currency = home currency of ORDERING_BIC8 country) ≈ 0.84–0.95 per country (overall 89.4%)
+otherwise a vehicle currency: EUR 464k · USD 231k · GBP 78k · CHF 58k · CNY 30k · SGD 23k
+the home-currency share does not depend on party type (89.3–89.6%) and barely on amount</div>
+      <p class="why"><b>Observed:</b> each country has one dominant currency (EUR for the euro area; GBP for IM and JE; CHF for LI). RU stands out at 69% RUB. <b>Reading:</b> customers fund payments from local-currency accounts. Invoices priced in global vehicle currencies (EUR, USD) take the rest, in proportion to how widely those currencies are used.</p></div>
+    <div class="rule"><div class="row"><span class="rid">C2</span><h3>FX count = number of currency borders between consecutive banks</h3><span class="chip c-exact">Exact · 9,999,998 / 10,000,000</span></div>
+      <div class="formula">CURRENCY_CONVERSION_COUNT = Σ over adjacent known BICs (i, i+1) in BIC8_PATH of 1[home_ccy(i) ≠ home_ccy(i+1)]
+'...' placeholders are skipped; the payment's own currency is NOT part of the rule</div>
+      <p class="why"><b>Observed:</b> the rule matches every row except 2, whose BIC country has no currency in our map. <b>Rejected:</b> "count distinct currencies" (90.6%) and "add 1 if payment currency ≠ first bank" (93.5%). <b>Reading:</b> each correspondent converts into the currency of the account it holds with the next bank, so FX steps follow currency borders.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="fig"><h4>Every large sender country pays mostly in its home currency</h4><div class="cv tall"><canvas id="c_localccy"></canvas></div><div class="cap">Share of payments by currency, top 12 sending countries.</div></div>
+    <div class="fig"><h4>FX count can never exceed the number of hops (pc − 1)</h4><div class="cv tall"><canvas id="c_fxpc"></canvas></div><div class="cap">Payments by participant count (x) and FX count (stack). The stack stops at pc − 1.</div></div>
+  </div>
+</section>
+
+<section id="routing">
+  <div class="sechead"><div class="eyebrow">04 · Feature group: routing (TRANSACTION_TYPE, BIC8_PATH, PARTICIPANT_COUNT, CONTINUITY_QFLAG)</div><h2>Route length is a coin-flip chain with a 1/e continuation probability</h2></div>
+  <div class="rules">
+    <div class="rule"><div class="row"><span class="rid">R1</span><h3>Number of intermediaries K = ⌊Exp(1)⌋</h3><span class="chip c-exact">Exact fit</span></div>
+      <div class="formula">P(K = k) = (1 − e⁻¹)·e⁻ᵏ  →  P(Direct) = 0.632, and each extra hop is 0.368× as likely as the previous one
+PARTICIPANT_COUNT = K + 2 = number of known BICs in the path</div>
+      <p class="why"><b>Observed:</b> the ratios between successive counts are 0.3676, 0.3680, 0.3671, 0.3685… The Direct share is 0.632 ± binomial noise for every sending bank and the same for domestic and cross-border payments. <b>Rejected:</b> "routing depends on the bank pair": only 10% of payments sit on pairs that always use one type, which is chance level. <b>Reading:</b> in the generator, a correspondent relationship exists with a fixed probability at each step. In reality this would depend on bilateral account networks.</p></div>
+    <div class="rule"><div class="row"><span class="rid">R2</span><h3>Covered is a constant 11.3% of non-direct routes</h3><span class="chip c-exact">Exact fit</span></div>
+      <div class="formula">ttype = Direct if K=0, else Covered with p ≈ 0.113 (independent of K, party type, domestic/cross-border), else Indirect</div>
+      <p class="why"><b>Observed:</b> the Covered share is 11.32%, 11.29%, 11.33% at K = 1, 2, 3. Covered routes are slower (median 288 s vs 87 s at pc = 3) and slightly larger (+0.15 in ln amount). <b>Reading:</b> the cover method (MT103 sent direct, MT202 COV through correspondents) adds a second settlement leg.</p></div>
+    <div class="rule"><div class="row"><span class="rid">R3</span><h3>Intermediaries are drawn in proportion to bank size</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">P(bank b chosen as intermediary) ∝ activity(b);  corr(log intermediary uses, log payments sent) = <span id="icorr"></span>
+intermediaries sit in the payment-currency zone only 17% of the time</div>
+      <p class="why"><b>Rejected:</b> "intermediaries are clearing banks of the payment currency" (for example USD through US banks). <b>Reading:</b> large banks (US, CH, GB, DE hubs) act as correspondents because they hold the most nostro accounts.</p></div>
+    <div class="rule"><div class="row"><span class="rid">R4</span><h3>Each link hides with 5% probability, and gaps chain geometrically</h3><span class="chip c-exact">Exact fit</span></div>
+      <div class="formula">P(CONTINUITY_QFLAG = N) = 1 − 0.95^(pc − 1);   per hidden link, extra '...' tokens ~ Geometric(0.05)
+CONTINUITY_QFLAG = 'N' ⇔ path contains '...' (100%)</div>
+      <p class="why"><b>Observed:</b> predicted vs actual: 5.00/4.99%, 9.75/9.74%, 14.26/14.25%, 18.55/18.50%. Gap counts on direct paths fall 299,417 → 15,076 → 739 → 30, a ratio of 0.05 each step. <b>Reading:</b> legs outside the observed messaging channel (for example a domestic clearing leg) leave unobserved hops.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="fig"><h4>Hop counts fall by e⁻¹ at every step: observed bars sit on the prediction</h4><div class="cv"><canvas id="c_hops"></canvas></div><div class="cap">Payments by participant count (log scale). Line = 10M × (1 − e⁻¹)e⁻ᵏ.</div></div>
+    <div class="fig"><h4>Path-gap probability rises exactly as 1 − 0.95 per link</h4><div class="cv"><canvas id="c_gap"></canvas></div><div class="cap">Share of paths flagged N, by participant count, vs the formula.</div></div>
+  </div>
+</section>
+
+<section id="duration">
+  <div class="sechead"><div class="eyebrow">05 · Feature group: processing time (TOTAL_DURATION)</div><h2>Duration is a sum of per-bank processing times, set by each bank's straight-through rate</h2></div>
+  <div class="rules">
+    <div class="rule"><div class="row"><span class="rid">D1</span><h3>Each bank adds either a fast (seconds) or a manual (~20 min) step</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">TOTAL_DURATION ≈ Σ over participants b of { fast step ≈ 7–15 s  with prob STP(b) ;  manual step, median ≈ 1,400 s, otherwise }
+both banks fast: median 27 s · one slow: ~1,400 s · both slow: 2,666 s (≈ 2 × 1,400)</div>
+      <p class="why"><b>Observed:</b> log-duration is bimodal (peaks at 16–32 s and 512–2,048 s). The slow mode adds up across slow banks. The lower quantiles grow by about 7–8 s per extra participant. <b>Reading:</b> straight-through processing versus manual repair or compliance review at a bank.</p></div>
+    <div class="rule"><div class="row"><span class="rid">D2</span><h3>STP rate is a bank attribute, and small banks are far more often manual</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">share of banks with slow-rate > 90%: &lt;100 payments 55% · 100–999 55% · 1k–9.9k 41% · 10k+ 0.8%
+no dependence on hour, weekday, party type or amount (slow share 39–43% across amount deciles)</div>
+      <p class="why"><b>Observed:</b> per-bank slow shares are bimodal (about 0.05–0.2 or about 1.0), far wider than binomial noise. <b>Rejected:</b> "queued outside business hours" (slow share flat across 24 h) and "large payments get reviewed" (slightly the reverse). <b>Reading:</b> large banks invest in STP automation, while small banks key payments by hand.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="fig"><h4>Two-bank payments split into a seconds mode and a ~20-minute mode</h4><div class="cv"><canvas id="c_durhist"></canvas></div><div class="cap">Direct (pc = 2) payments by duration, log₂ bins in seconds.</div></div>
+    <div class="fig"><h4>Slow banks add their delays: one slow bank ≈ 1,400 s, two ≈ 2,700 s</h4><div class="cv"><canvas id="c_durclass"></canvas></div><div class="cap">Median duration of pc = 2 payments by bank class (slow = >95% of its payments over 120 s).</div></div>
+  </div>
+</section>
+
+<section id="amount">
+  <div class="sechead"><div class="eyebrow">06 · Feature group: payment value (USD_AMOUNT)</div><h2>Amounts are log-normal, and each business party multiplies the typical value by e² ≈ 7.4</h2></div>
+  <div class="rules">
+    <div class="rule"><div class="row"><span class="rid">A1</span><h3>An additive log-mean model by party type</h3><span class="chip c-exact">Exact fit</span></div>
+      <div class="formula">ln(USD_AMOUNT) ~ Normal( μ = 6 + 2·1[ordering = B] + 2·1[beneficiary = B] + country_o + bank , σ ≈ 2.0 )
+observed μ: CC 6.06 · BC 7.99 · CB 8.03 · BB 10.00 ; σ = 2.28–2.29 in every segment (skew −0.12)</div>
+      <p class="why"><b>Observed:</b> the four segment means sit on an exact 2-unit lattice with identical spread. Medians: C→C $464, B→C $3,118, C→B $3,236, B→B $22,883. <b>Reading:</b> commercial flows (supplier and payroll) are an order of magnitude larger than personal remittances, and business-to-business trade is the largest.</p></div>
+    <div class="rule"><div class="row"><span class="rid">A2</span><h3>The sending country sets a wealth level; the beneficiary country barely matters</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">country_o effect (ln units): MC +2.0 · LI +1.7 · LU +1.2 · KY +1.1 · IE +1.0 … IN −2.6 · BD −3.2 ;  sd across beneficiary countries ≈ <span id="bsd"></span>
+Variance of ln amount (5.22): country <span id="v_c"></span> · bank <span id="v_b"></span> · account <span id="v_a"></span> · noise <span id="v_n"></span></div>
+      <p class="why"><b>Observed:</b> the effect correlates with country payment volume (r = 0.49). Individual accounts add almost nothing. <b>Reading:</b> the case study's "GDP" style rule: financial centres and rich economies originate larger tickets. Country values are randomised, so the ranking is not real-world.</p></div>
+    <div class="rule"><div class="row"><span class="rid">A3</span><h3>Round amounts are slightly more common between businesses</h3><span class="chip c-partial">Partial</span></div>
+      <div class="formula">share of multiples of 1,000 (normal rows): BB 2.7% · BC 1.9% · CB 1.8% · CC 0.9%; integers 6.9–7.7%</div>
+      <p class="why">Detected but not modelled further. It may be a by-product of how the amount is generated in the original currency before conversion.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="fig"><h4>Four party-type segments: same bell shape, shifted by 2 ln-units per business party</h4><div class="cv"><canvas id="c_amt"></canvas></div><div class="cap">Share of each segment by log₁₀ amount (0.25 bins), normal rows.</div></div>
+    <div class="fig"><h4>Sending country moves the typical amount by up to ±e³</h4><div class="cv tall"><canvas id="c_country"></canvas></div><div class="cap">Country effect on ln amount after removing party type; 10 lowest and 10 highest of 62 countries.</div></div>
+  </div>
+</section>
+
+<section id="parties">
+  <div class="sechead"><div class="eyebrow">07 · Feature group: parties, accounts &amp; details text</div><h2>Text formats follow SWIFT MT conventions and country rules; beneficiary location is decoupled</h2></div>
+  <div class="rules">
+    <div class="rule"><div class="row"><span class="rid">P1</span><h3>Party type sets the name grammar, never mixed</h3><span class="chip c-exact">Exact</span></div>
+      <div class="formula">type B → &lt;business&gt; 86%, &lt;company_keyword&gt; 26%, never first/last name
+type C → &lt;last_name&gt; 86%, &lt;first_name&gt; 58%, never business tokens
+P(ordering = B) = 78.7% (varies by country 38–96%) ; P(beneficiary = B) = 28.8%, independent of ordering type</div>
+      <p class="why"><b>Reading:</b> corporate senders dominate cross-border initiation, while beneficiaries are mostly individuals (payroll, suppliers paying sole traders, remittances).</p></div>
+    <div class="rule"><div class="row"><span class="rid">P2</span><h3>Account format: IBAN only in IBAN countries, about 92% of the time</h3><span class="chip c-exact">Exact</span></div>
+      <div class="formula">IBAN-country banks: 84–100% IBAN ; non-IBAN countries (US, CN, AU, JP, SG, CA, HK, IM, JE…): 0%
+IBAN country prefix = BIC country in 100% of rows</div>
+      <p class="why">Mirrors the real IBAN registry. The structured 50F/59F address layout (<code>1/ 2/ 3/</code>) is also set per country: never in LI, MC, LU, QA; always in IM, JE, CK; about 15% elsewhere.</p></div>
+    <div class="rule"><div class="row"><span class="rid">P3</span><h3>Free-text fields obey the 4×35 MT layout</h3><span class="chip c-exact">Exact</span></div>
+      <div class="formula">optional '/account' line + ≤4 lines of ≤35 chars (99.96% of lines ≤35; 99.83% ≤4 lines); &lt;line_break:35&gt; marks forced wrapping</div>
+      <p class="why">The generator wraps names and addresses into the fixed-width fields of an MT103 message.</p></div>
+    <div class="rule"><div class="row"><span class="rid">P4</span><h3>Senders live where they bank; beneficiaries usually do not</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">ordering address country = BIC country: 100% ;  beneficiary address country = BIC country: 0.98%
+beneficiary address country is weighted toward populous countries (CN, BR, UA, ET, IN, MX…) while beneficiary banks cluster in hubs (US 19%)
+each beneficiary account keeps one address country (100%)</div>
+      <p class="why"><b>Reading:</b> the generator samples the beneficiary's residence by population and their bank by banking size, independently. In the real world this would mean diaspora or non-resident accounts. Here it is almost certainly a modelling shortcut, and we label it as such.</p></div>
+    <div class="rule"><div class="row"><span class="rid">P5</span><h3>Account activity is heavy-tailed</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">391k sending accounts; 1,216 accounts with ≥1,000 payments make 29.5% of all payments; 2.59M beneficiary accounts (median 1 payment)
+each account has a single type and a single bank (100%)</div>
+      <p class="why">Large corporates and payment aggregators send the most, while individual receivers appear once or twice.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="fig"><h4>Business and consumer details use disjoint name tokens</h4><div class="cv tall"><canvas id="c_tokens"></canvas></div><div class="cap">Share of ordering-party records containing each token type (500k sample).</div></div>
+    <div class="fig"><h4>Senders come from banking hubs, beneficiaries from populous countries</h4><div class="cv tall"><canvas id="c_ccmp"></canvas></div><div class="cap">Country share: sending bank vs beneficiary address (where stated).</div></div>
+  </div>
+</section>
+
+<section id="anomaly">
+  <div class="sechead"><div class="eyebrow">08 · Feature group: anomalies (ANOMALY_TYPE, 7,006 rows = 0.07%)</div><h2>Each anomaly is injected with its own signature: sequence, copy, scaling or mule account</h2></div>
+  <div class="rules">
+    <div class="rule"><div class="row"><span class="rid">X1</span><h3>Romance scam: escalating bursts from consumers</h3><span class="chip c-exact">Exact fit</span></div>
+      <div class="formula">500 series, one consumer → one beneficiary, 2–8 payments each (counts 61, 95, 64, 71, 74, 66, 69)
+each payment ≈ 1.5× the previous one (Δln ≈ +0.40 per step); gap between payments mean ≈ 306 s (median 215 s)
+sender is a consumer in 100% of rows; amounts small (median $109); senders concentrated in IN, CN, US, BR, ID, PK, NG</div>
+      <p class="why"><b>Reading:</b> victims are groomed into repeated, growing transfers. The case text says C→C, but the beneficiary type follows the base mix (27% B), so the rule constrains only the sender.</p></div>
+    <div class="rule"><div class="row"><span class="rid">X2</span><h3>Duplicate payment: 2–5 identical copies within 2 hours</h3><span class="chip c-exact">Exact</span></div>
+      <div class="formula">185 groups (sizes 2/3/4/5 → 37/43/49/56 groups); all copies share sender, beneficiary, amount, currency, path AND duration
+span ≤ 7,043 s; EVERY copy is labelled, including the first</div>
+      <p class="why"><b>Reading:</b> a back-office resend or race condition replays the same message. The labelling convention matters: a detector cannot treat the first copy as clean.</p></div>
+    <div class="rule"><div class="row"><span class="rid">X3</span><h3>Fat finger: amount ×100 (77%) or ÷100 (23%)</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">log₁₀(amount / expected) is bimodal at about +2.3 and −2.3; up-share = <span id="ffup"></span>; party mix and timing look like normal traffic</div>
+      <p class="why"><b>Reading:</b> a decimal separator (comma vs dot) misplaced by two digits. We cannot tell ×100 from ×1000 for individual rows because normal amounts already vary by ±0.9 in log₁₀.</p></div>
+    <div class="rule"><div class="row"><span class="rid">X4</span><h3>CEO and account-replacement scams pay into mule accounts at small, slow banks</h3><span class="chip c-strong">Strong</span></div>
+      <div class="formula">CEO: sender = business in 100%; cross-border 98.7%; amount +1.4 ln above the segment norm
+both: ~48% of beneficiary accounts receive ONLY scam money, each from several victims (up to 10)
+beneficiary bank median size ~720 payments vs 8,050 normally; 45% are slow (non-STP) banks vs 17%</div>
+      <p class="why"><b>Observed:</b> the scams' longer durations (median 741 s and 571 s vs 56 s) come from which bank is involved, not from an added delay: within the same bank-speed stratum, scams are no slower. <b>Negative result:</b> we found no evidence that account-replacement scams reuse a legitimate payee's name with a swapped account (1 match in 649).</p></div>
+    <div class="rule"><div class="row"><span class="rid">X5</span><h3>Customer recall: indistinguishable from normal traffic</h3><span class="chip c-open">Open</span></div>
+      <div class="formula">317 rows; party mix, amount, duration, routing and banks all match the normal profile</div>
+      <p class="why">We found no signature in the observable fields. A recall is a post-hoc event (the customer asks for the money back), so it may be labelled at random by design. Reported as a negative result.</p></div>
+  </div>
+  <div class="grid2">
+    <div class="fig"><h4>Romance-scam amounts climb about 1.5× per payment</h4><div class="cv"><canvas id="c_rom"></canvas></div><div class="cap">Mean ln(amount) by position in the series (all 500 series).</div></div>
+    <div class="fig"><h4>Fat-finger amounts sit two orders of magnitude off their expected value</h4><div class="cv"><canvas id="c_ff"></canvas></div><div class="cap">Share of rows by log₁₀(amount ÷ segment-and-country expectation).</div></div>
+  </div>
+</section>
+
+<section id="open">
+  <div class="sechead"><div class="eyebrow">09 · Limits</div><h2>What we could not explain yet</h2></div>
+  <ul class="tight">
+    <li><b>Weekly multipliers (T4):</b> the levels are measured, but we have not found a cause. Next test: correlate with calendar features (month-end, quarter-end, 4-4-5 patterns).</li>
+    <li><b>Vehicle-currency choice (C1):</b> which non-home currency is picked. It looks like global currency popularity, but this is not proven.</li>
+    <li><b>Fast-step size (D1):</b> per-hop fast time looks Gamma-like at about 7–15 s; we have not fitted the exact distribution or the manual-step tail (max 21,649 s).</li>
+    <li><b>Bank-level amount effect (A2):</b> about 0.22 of ln-variance sits at bank level. Is it a bank attribute or bank-size driven?</li>
+    <li><b>Country B-share (P1):</b> ranges from 38% to 96% and is unrelated to the amount effect (r = −0.18); its origin is unknown.</li>
+    <li><b>Customer recall (X5)</b> and the <b>account-replacement name-swap</b> hypothesis: no signal found.</li>
+  </ul>
+</section>
+
+<section id="lenses">
+  <div class="sechead"><div class="eyebrow">10 · Professional lenses</div><h2>What each discipline takes from these rules</h2></div>
+  <div class="lens">
+    <div><h3>Statistician</h3><p class="why">Prefer exact-match tests where a rule is deterministic (C2, R4) and distribution fits where it is stochastic (R1 geometric, A1 log-normal). Report match rates, ratios and variance shares rather than p-values: at n = 10M everything is "significant".</p></div>
+    <div><h3>Actuary</h3><p class="why">Fraud is a frequency–severity problem. Frequency is 7 per 10k payments. Severity varies: romance scams are small but repeated and compounding (×1.5 per step); CEO scams are large single losses (+1.4 ln). Mule concentration means a few beneficiary accounts carry the aggregate exposure.</p></div>
+    <div><h3>Finance &amp; economics</h3><p class="why">Home-currency invoicing with EUR and USD as vehicles, FX at every currency border, correspondent hubs in US, CH and GB, and the cover method adding settlement time all match how correspondent banking works. Tie these to the "Interpretation" marks (12%).</p></div>
+    <div><h3>Data scientist / AI engineer</h3><p class="why">A rules-first approach beats black-box models here, because judges score explicit rules. ML is useful only for discovery (for example a tree on <code>dur &gt; 120</code> to confirm bank identity dominates). Detectors: duplicate = exact-key match within 2 h; romance = escalating burst; mule = beneficiary that only receives anomalous money.</p></div>
+    <div><h3>Software engineer</h3><p class="why">4.6 GB CSV → Parquet (1.27 GB) → slim Parquet (0.48 GB) in DuckDB; every figure is regenerated by one script. Disk was nearly full (4 GB free), so no intermediate database was kept.</p></div>
+    <div><h3>MBA / Swift strategy</h3><p class="why">For Swift's network: STP gaps at small banks drive delay (an investment case for gpi-style tracking), hidden legs (7.7%) reduce transparency, and anomaly signatures (bursts, duplicates, mule beneficiaries) can be detected from network data alone.</p></div>
+  </div>
+</section>
+
+<section id="plan">
+  <div class="sechead"><div class="eyebrow">11 · Submission plan</div><h2>Eight dashboard pages and sixteen slides, one per feature group</h2></div>
+  <div class="tbl"><table>
+    <thead><tr><th>#</th><th>Dashboard page (one feature group)</th><th>Headline rule for the slide</th><th>Key charts</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Overview &amp; data integrity</td><td>10M payments, 93 days, 8 issues handled, 0 rows dropped</td><td>Issues log, feature map</td></tr>
+      <tr><td>2</td><td>Time</td><td>Local office clock (07:00 start) × global weekly step; DST frozen</td><td>Daily volume, local-hour curve, weekday shares</td></tr>
+      <tr><td>3</td><td>Currency &amp; FX</td><td>89% home currency; FX = currency borders (exact)</td><td>Currency mix, pc × FX stack</td></tr>
+      <tr><td>4</td><td>Routing</td><td>K = ⌊Exp(1)⌋; Covered 11.3%; gaps 1 − 0.95ᵏ</td><td>Hop counts vs geometric, gap curve</td></tr>
+      <tr><td>5</td><td>Processing time</td><td>Sum of per-bank steps; STP set by bank size</td><td>Duration histogram, bank-class medians</td></tr>
+      <tr><td>6</td><td>Payment value</td><td>ln amount = 6 + 2B<sub>o</sub> + 2B<sub>b</sub> + country</td><td>Segment histograms, country effects, variance split</td></tr>
+      <tr><td>7</td><td>Parties, accounts &amp; text</td><td>Type grammar; IBAN by country; 4×35; decoupled beneficiary location</td><td>Token presence, country comparison</td></tr>
+      <tr><td>8</td><td>Anomalies</td><td>Six signatures: burst, copy, ×100, mule, (recall: none)</td><td>Romance escalation, fat-finger residuals, mule shares</td></tr>
+    </tbody></table></div>
+  <p class="callout">Slides (16): title · problem and approach · methodology (hypothesis loop, exact-match vs fit tests) · data integrity · eight feature-group slides · open questions and rejected hypotheses · implications for Swift · conclusion · references (APA 7). Per the briefing, slides should explain insights and economic reasoning rather than code.</p>
+</section>
+
+<footer>
+  <div>Reproducibility: <code>analysis/00_to_parquet.py</code> → <code>01_build_slim.py</code> → <code>02_rules_evidence.py</code> (writes <code>evidence.json</code>, which feeds every chart). Tools: Python 3.12, DuckDB 1.5, pandas, NumPy, Chart.js 4.4. AI assistance used for coding and drafting, which the rules allow (§3.6).</div>
+  <div>All figures come from the provided synthetic dataset only. Country-level values reflect randomised generator inputs, not real economies.</div>
+</footer>
+</div>
+
+<script id="ev" type="application/json">__EVIDENCE__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const E = JSON.parse(document.getElementById('ev').textContent);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (x,d=0) => Number(x).toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
+// static numbers
+document.getElementById('icorr').textContent = E.intermediary_corr.toFixed(2);
+document.getElementById('bsd').textContent = E.amt_bene_country_sd.toFixed(2);
+const V=E.amt_variance; [['v_c',V.country],['v_b',V.bank],['v_a',V.account],['v_n',V.noise]].forEach(([i,v])=>document.getElementById(i).textContent=v.toFixed(2));
+document.getElementById('ffup').textContent = (E.fat_finger_up_share*100).toFixed(0)+'%';
+const anomTot = E.anom_counts.reduce((a,b)=>a+b.n,0);
+document.getElementById('score').innerHTML = [
+  [fmt(E.n),'payments profiled (no rows dropped)'],
+  ['25','rules stated with condition, effect and scope'],
+  ['12','reproduce the data exactly or near-exactly'],
+  [(E.fx_rule.exact/E.fx_rule.n*100).toFixed(5)+'%','FX-count rule match rate'],
+  [fmt(anomTot),'labelled anomalies across 6 types']
+].map(([b,s])=>`<div><b>${b}</b><span>${s}</span></div>`).join('');
+
+let charts=[];
+function base(extra={}){
+  const ink=css('--ink2'), grid=css('--line');
+  return Object.assign({responsive:true,maintainAspectRatio:false,animation:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{legend:{labels:{color:ink,boxWidth:10,boxHeight:10,font:{family:'IBM Plex Sans',size:12}}},tooltip:{}},
+    scales:{x:{ticks:{color:ink,font:{size:11}},grid:{color:grid,drawTicks:false},border:{color:grid}},
+            y:{ticks:{color:ink,font:{size:11}},grid:{color:grid},border:{display:false}}}},extra);
+}
+function mk(id,cfg){charts.push(new Chart(document.getElementById(id),cfg));}
+function render(){
+  charts.forEach(c=>c.destroy()); charts=[];
+  const s1=css('--s1'),s2=css('--s2'),s3=css('--s3'),s4=css('--s4'),mut=css('--muted'),ink=css('--ink');
+  Chart.defaults.font.family='IBM Plex Sans'; Chart.defaults.color=css('--ink2');
+
+  // daily
+  mk('c_daily',{type:'bar',data:{labels:E.daily.map(d=>d.d.slice(5)),datasets:[{label:'Payments',data:E.daily.map(d=>d.n),
+    backgroundColor:E.daily.map(d=>(d.dow===0||d.dow===6)?s2:s1),borderRadius:2,barPercentage:.9,categoryPercentage:1}]},
+    options:base({plugins:{legend:{display:false}},scales:{x:{ticks:{color:css('--ink2'),maxTicksLimit:10,font:{size:11}},grid:{display:false}},y:{ticks:{color:css('--ink2'),callback:v=>fmt(v/1000)+'k'},grid:{color:css('--line')}}}})});
+
+  // local hour
+  const lh=t=>{const r=E.local_hour.filter(x=>x.otype===t);const s=r.reduce((a,b)=>a+b.n,0);return r.sort((a,b)=>a.lh-b.lh).map(x=>x.n/s*100)};
+  mk('c_lhour',{type:'line',data:{labels:[...Array(24).keys()].map(h=>String(h).padStart(2,'0')),datasets:[
+    {label:'Business senders',data:lh('B'),borderColor:s1,backgroundColor:s1,borderWidth:2,pointRadius:0,tension:.25},
+    {label:'Consumer senders',data:lh('C'),borderColor:s2,backgroundColor:s2,borderWidth:2,pointRadius:0,tension:.25}]},
+    options:base({scales:{x:{ticks:{color:css('--ink2')},grid:{display:false},title:{display:true,text:'Local hour',color:mut}},y:{ticks:{color:css('--ink2'),callback:v=>v+'%'},grid:{color:css('--line')}}}})});
+
+  // local ccy stacked horizontal
+  const L=E.local_ccy_by_country.slice(0,12);
+  const other=L.map(r=>Math.max(0,1-r.local_sh-r.eur-r.usd-r.gbp-r.chf));
+  mk('c_localccy',{type:'bar',data:{labels:L.map(r=>r.cc),datasets:[
+    {label:'Home currency',data:L.map(r=>r.local_sh*100),backgroundColor:s1},
+    {label:'EUR (vehicle)',data:L.map(r=>r.eur*100),backgroundColor:s2},
+    {label:'USD (vehicle)',data:L.map(r=>r.usd*100),backgroundColor:s3},
+    {label:'GBP/CHF/other',data:L.map((r,i)=>(r.gbp+r.chf+other[i])*100),backgroundColor:s4}]},
+    options:base({indexAxis:'y',scales:{x:{stacked:true,max:100,ticks:{color:css('--ink2'),callback:v=>v+'%'},grid:{color:css('--line')}},y:{stacked:true,ticks:{color:css('--ink2')},grid:{display:false}}}})});
+
+  // fx by pc stacked
+  const pcs=[2,3,4,5,6], fxs=[0,1,2,3,4,5];
+  const fxcol=[css('--line'),s1,s2,s3,s4,css('--muted')];
+  mk('c_fxpc',{type:'bar',data:{labels:pcs.map(p=>'pc '+p),datasets:fxs.map((f,i)=>({label:'FX = '+f,
+    data:pcs.map(p=>{const r=E.fx_by_pc.find(x=>x.pc===p&&x.fx===f);const tot=E.fx_by_pc.filter(x=>x.pc===p).reduce((a,b)=>a+b.n,0);return r?r.n/tot*100:0}),
+    backgroundColor:fxcol[i]}))},
+    options:base({scales:{x:{stacked:true,ticks:{color:css('--ink2')},grid:{display:false}},y:{stacked:true,max:100,ticks:{color:css('--ink2'),callback:v=>v+'%'},grid:{color:css('--line')}}}})});
+
+  // hops
+  const H=E.hops.filter(h=>h.pc<=13);
+  mk('c_hops',{type:'bar',data:{labels:H.map(h=>h.pc),datasets:[
+    {type:'line',label:'Geometric(1 − 1/e) prediction',data:H.map(h=>E.n*(1-Math.exp(-1))*Math.exp(-(h.pc-2))),borderColor:s2,backgroundColor:s2,borderWidth:2,pointRadius:3},
+    {label:'Observed',data:H.map(h=>h.n),backgroundColor:s1,borderRadius:3}]},
+    options:base({scales:{x:{ticks:{color:css('--ink2')},grid:{display:false},title:{display:true,text:'Participant count',color:mut}},y:{type:'logarithmic',ticks:{color:css('--ink2'),callback:(v)=>[1,10,100,1e3,1e4,1e5,1e6,1e7].includes(v)?fmt(v):''},grid:{color:css('--line')}}}})});
+
+  // gap
+  const G=E.gap_by_pc;
+  mk('c_gap',{type:'line',data:{labels:G.map(g=>g.pc),datasets:[
+    {label:'Observed share N',data:G.map(g=>g.p*100),borderColor:s1,backgroundColor:s1,borderWidth:2,pointRadius:4,showLine:false},
+    {label:'1 − 0.95^(pc−1)',data:G.map(g=>(1-Math.pow(.95,g.pc-1))*100),borderColor:s2,borderWidth:2,pointRadius:0,borderDash:[5,4]}]},
+    options:base({scales:{x:{ticks:{color:css('--ink2')},grid:{display:false},title:{display:true,text:'Participant count',color:mut}},y:{ticks:{color:css('--ink2'),callback:v=>v+'%'},grid:{color:css('--line')}}}})});
+
+  // duration hist
+  const D=E.dur_hist_pc2;
+  mk('c_durhist',{type:'bar',data:{labels:D.map(d=>d.lb<10?(2**d.lb)+'s':(2**d.lb>=3600?(2**d.lb/3600).toFixed(1)+'h':Math.round(2**d.lb/60)+'m')),datasets:[{label:'Payments',data:D.map(d=>d.n),
+    backgroundColor:D.map(d=>d.lb>=7?s2:s1),borderRadius:3}]},
+    options:base({plugins:{legend:{display:false}},scales:{x:{ticks:{color:css('--ink2')},grid:{display:false},title:{display:true,text:'Duration bin start',color:mut}},y:{ticks:{color:css('--ink2'),callback:v=>fmt(v/1e6,1)+'M'},grid:{color:css('--line')}}}})});
+
+  // duration class
+  const DC=E.dur_bank_class;
+  mk('c_durclass',{type:'bar',data:{labels:DC.map(d=>`${d.o_cls} → ${d.b_cls}`),datasets:[{label:'Median seconds',data:DC.map(d=>d.med),backgroundColor:[s1,s2,s2,s4],borderRadius:4}]},
+    options:base({plugins:{legend:{display:false},tooltip:{callbacks:{afterLabel:(c)=>'payments: '+fmt(DC[c.dataIndex].n)}}},scales:{x:{ticks:{color:css('--ink2')},grid:{display:false},title:{display:true,text:'Sending bank → receiving bank',color:mut}},y:{ticks:{color:css('--ink2')},grid:{color:css('--line')},title:{display:true,text:'Median duration (s)',color:mut}}}})});
+
+  // amount hist
+  const segs=['CC','BC','CB','BB'], sc={CC:s3,BC:s1,CB:s4,BB:s2}, names={CC:'Consumer → Consumer',BC:'Business → Consumer',CB:'Consumer → Business',BB:'Business → Business'};
+  const lbs=[...new Set(E.amt_hist.map(r=>r.lb))].sort((a,b)=>a-b).filter(x=>x>=-1&&x<=8);
+  mk('c_amt',{type:'line',data:{labels:lbs.map(x=>x%1===0?'$1e'+x:''),datasets:segs.map(s=>{const rows=E.amt_hist.filter(r=>r.seg===s);const tot=rows.reduce((a,b)=>a+b.n,0);
+    return {label:names[s],data:lbs.map(l=>{const r=rows.find(x=>x.lb===l);return r?r.n/tot*100:0}),borderColor:sc[s],backgroundColor:sc[s],borderWidth:2,pointRadius:0,tension:.3}})},
+    options:base({scales:{x:{ticks:{color:css('--ink2'),autoSkip:false,maxRotation:0},grid:{display:false}},y:{ticks:{color:css('--ink2'),callback:v=>v+'%'},grid:{color:css('--line')}}}})});
+
+  // country effects
+  const C=E.amt_country, sel=[...C.slice(0,10),...C.slice(-10)];
+  mk('c_country',{type:'bar',data:{labels:sel.map(r=>r.cc),datasets:[{label:'Effect on ln amount',data:sel.map(r=>r.eff),backgroundColor:sel.map(r=>r.eff<0?s2:s1),borderRadius:3}]},
+    options:base({indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:css('--ink2')},grid:{color:css('--line')},title:{display:true,text:'ln-units vs overall (e¹ ≈ 2.7×)',color:mut}},y:{ticks:{color:css('--ink2'),autoSkip:false,font:{size:11}},grid:{display:false}}}})});
+
+  // tokens
+  const toks=['business','company_keyword','last_name','first_name','street','city','country_code','country_name','post_code','iban','line_break','separator','finance_word'];
+  const tp=(ty,t)=>{const r=E.token_presence.find(x=>x.ty===ty&&x.tok===t);return r?r.share*100:0};
+  mk('c_tokens',{type:'bar',data:{labels:toks,datasets:[{label:'Business (B)',data:toks.map(t=>tp('B',t)),backgroundColor:s1,borderRadius:2},{label:'Consumer (C)',data:toks.map(t=>tp('C',t)),backgroundColor:s2,borderRadius:2}]},
+    options:base({indexAxis:'y',scales:{x:{max:100,ticks:{color:css('--ink2'),callback:v=>v+'%'},grid:{color:css('--line')}},y:{ticks:{color:css('--ink2'),autoSkip:false,font:{family:'IBM Plex Mono',size:11}},grid:{display:false}}}})});
+
+  // country compare
+  const CC=E.country_dist_compare.slice(0,14);
+  mk('c_ccmp',{type:'bar',data:{labels:CC.map(r=>r.cc),datasets:[{label:'Sending bank country',data:CC.map(r=>r.o_bank*100),backgroundColor:s1,borderRadius:2},{label:'Beneficiary address country',data:CC.map(r=>r.b_cust*100),backgroundColor:s2,borderRadius:2}]},
+    options:base({indexAxis:'y',scales:{x:{ticks:{color:css('--ink2'),callback:v=>v+'%'},grid:{color:css('--line')}},y:{ticks:{color:css('--ink2'),autoSkip:false},grid:{display:false}}}})});
+
+  // romance
+  const R=E.romance_steps;
+  mk('c_rom',{type:'line',data:{labels:R.map(r=>'#'+r.k),datasets:[
+    {label:'Observed mean ln(amount)',data:R.map(r=>r.mlog),borderColor:s1,backgroundColor:s1,borderWidth:2,pointRadius:4},
+    {label:'+0.40 per step (×1.5)',data:R.map(r=>R[0].mlog+0.40*(r.k-1)),borderColor:s2,borderWidth:2,borderDash:[5,4],pointRadius:0}]},
+    options:base({plugins:{tooltip:{callbacks:{afterLabel:c=>c.datasetIndex===0?'payments at this step: '+R[c.dataIndex].c:''}}},scales:{x:{ticks:{color:css('--ink2')},grid:{display:false},title:{display:true,text:'Position in series',color:mut}},y:{ticks:{color:css('--ink2')},grid:{color:css('--line')}}}})});
+
+  // fat finger
+  const F=E.fat_finger_hist, N=E.normal_resid_hist, ft=F.reduce((a,b)=>a+b.n,0), nt=N.reduce((a,b)=>a+b.n,0);
+  mk('c_ff',{type:'bar',data:{labels:F.map(f=>(f.lb>0?'+':'')+f.lb.toFixed(1)),datasets:[
+    {type:'line',label:'Normal payments',data:N.map(n=>n.n/nt*100),borderColor:mut,borderWidth:2,pointRadius:0,tension:.3},
+    {label:'Fat-finger rows',data:F.map(f=>f.n/ft*100),backgroundColor:s2,borderRadius:2}]},
+    options:base({scales:{x:{ticks:{color:css('--ink2'),maxRotation:0,autoSkip:true,maxTicksLimit:11},grid:{display:false},title:{display:true,text:'log₁₀(amount ÷ expected)',color:mut}},y:{ticks:{color:css('--ink2'),callback:v=>v+'%'},grid:{color:css('--line')}}}})});
+}
+function start(){ if(window.Chart){render();} }
+start();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+</script>

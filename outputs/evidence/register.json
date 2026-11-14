@@ -1,0 +1,1624 @@
+[
+ {
+  "id": "R6",
+  "title": "PARTICIPANT_COUNT = number of known BICs in BIC8_PATH",
+  "type": "A",
+  "status": "PASS",
+  "criterion": "share_exact == 1",
+  "confidence": "High",
+  "layer": "Route",
+  "metrics": {
+   "P1": {
+    "share_exact": 1.0,
+    "n": 4650900.0
+   },
+   "P2": {
+    "share_exact": 1.0,
+    "n": 5349100.0
+   },
+   "full": {
+    "share_exact": 1.0,
+    "n": 10000000.0
+   },
+   "half_0": {
+    "share_exact": 1.0,
+    "n": 5004013.0
+   },
+   "half_1": {
+    "share_exact": 1.0,
+    "n": 4995987.0
+   }
+  },
+  "formulation": "PARTICIPANT_COUNT := number of BIC8 entries in BIC8_PATH that are not '...'",
+  "logic": "pc = |{b \u2208 split(path,';') : b \u2260 '...'}|  \u00b7 rulelib.participant_count",
+  "sample_size": "10,000,000 (n)",
+  "effect_size": "share_exact = 1",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Routing",
+  "hypothesis": "PARTICIPANT_COUNT is derived from the path, not drawn independently.",
+  "fields": "PARTICIPANT_COUNT, BIC8_PATH",
+  "method": "Exact equality test on all rows; pure-Python re-implementation on 200k sample.",
+  "counterexamples": "None found.",
+  "limitations": "Says nothing about how many hops were hidden.",
+  "economic": "Counts observed institutions only, i.e. what the messaging layer can see.",
+  "chart": "pc vs path elements table",
+  "deck": "Yes (method slide)"
+ },
+ {
+  "id": "R7",
+  "title": "CONTINUITY_QFLAG = 'N' iff path contains '...'",
+  "type": "A",
+  "status": "PASS",
+  "criterion": "share_exact == 1",
+  "confidence": "High",
+  "layer": "Route",
+  "metrics": {
+   "P1": {
+    "share_exact": 1.0,
+    "n": 4650900.0
+   },
+   "P2": {
+    "share_exact": 1.0,
+    "n": 5349100.0
+   },
+   "full": {
+    "share_exact": 1.0,
+    "n": 10000000.0
+   },
+   "half_0": {
+    "share_exact": 1.0,
+    "n": 5004013.0
+   },
+   "half_1": {
+    "share_exact": 1.0,
+    "n": 4995987.0
+   }
+  },
+  "formulation": "CONTINUITY_QFLAG := 'N' if BIC8_PATH contains '...', else 'Y'",
+  "logic": "cont = N \u21d4 '...' \u2208 split(path)  \u00b7 rulelib.continuity_flag",
+  "sample_size": "10,000,000 (n)",
+  "effect_size": "share_exact = 1",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Routing",
+  "hypothesis": "CONTINUITY_QFLAG encodes the presence of '...' placeholders.",
+  "fields": "CONTINUITY_QFLAG, BIC8_PATH",
+  "method": "Exact equivalence test.",
+  "counterexamples": "None.",
+  "limitations": "Flag is an observability marker, not payment success/failure.",
+  "economic": "A leg left the observed channel (e.g. a domestic clearing leg).",
+  "chart": "-",
+  "deck": "Yes"
+ },
+ {
+  "id": "R5",
+  "title": "Path endpoints differ from ORDERING/BENEFICIARY_BIC8 independently with p\u22480.05 each",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "first & last mismatch in [0.045,0.055] and joint/product ratio in [0.9,1.1]",
+  "confidence": "High",
+  "layer": "Route",
+  "metrics": {
+   "P1": {
+    "p_first": 0.049893999010944115,
+    "p_last": 0.04989636414457417,
+    "p_both": 0.0024754348620697067,
+    "indep_ratio": 0.9943385755304636
+   },
+   "P2": {
+    "p_first": 0.049792862350675815,
+    "p_last": 0.0499527023237554,
+    "p_both": 0.002463965900805743,
+    "indep_ratio": 0.9906234703194734
+   },
+   "full": {
+    "p_first": 0.0498399,
+    "p_last": 0.0499265,
+    "p_both": 0.0024693,
+    "indep_ratio": 0.9923515957157641
+   },
+   "half_0": {
+    "p_first": 0.04985938285931711,
+    "p_last": 0.05002345117808447,
+    "p_both": 0.002468418847033371,
+    "indep_ratio": 0.9896879992082818
+   },
+   "half_1": {
+    "p_first": 0.04982038584167653,
+    "p_last": 0.049829393070878684,
+    "p_both": 0.0024701825685295017,
+    "indep_ratio": 0.9950304438391282
+   }
+  },
+  "formulation": "With probability 0.05 the first known path BIC is replaced by another bank; independently, with probability 0.05 the last known BIC is replaced",
+  "logic": "P(k\u2081 \u2260 ORDERING_BIC8) = P(k_last \u2260 BENEFICIARY_BIC8) = 0.05; P(both) = 0.05\u00b2",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Routing",
+  "hypothesis": "Header BICs and path endpoints can disagree; disagreement is random noise or a structural role split.",
+  "fields": "ORDERING_BIC8, BENEFICIARY_BIC8, BIC8_PATH",
+  "method": "Mismatch rates per end, joint vs product (independence), stratified by type, pc, anomaly.",
+  "counterexamples": "ROMANCE_SCAM never swaps; CEO/ACCOUNT_REPLACEMENT never swap at the beneficiary end (mule bank is the true receiver).",
+  "limitations": "Cannot tell which institution is 'real' from one field alone; R5b resolves it with currency/clock/IBAN evidence.",
+  "economic": "Ordering institution (account servicer, MT field 52) \u2260 instructing agent that sends the message \u2014 common when a smaller bank uses a correspondent to send.",
+  "chart": "2\u00d72 mismatch table",
+  "deck": "Yes"
+ },
+ {
+  "id": "R5b",
+  "title": "On endpoint mismatch, currency follows the path's first bank; account/IBAN follows ORDERING_BIC8",
+  "type": "E",
+  "status": "PASS",
+  "criterion": "home-ccy share via path[1] > 0.85 and via ORDERING_BIC8 < 0.25; IBAN prefix = ORDERING_BIC8 country == 1",
+  "confidence": "Medium",
+  "layer": "Route",
+  "metrics": {
+   "P1": {
+    "ccy_follows_path_first": 0.9347258373123265,
+    "ccy_follows_obic": 0.13814145105407408,
+    "iban_follows_obic": 1.0,
+    "n": 232052.0
+   },
+   "P2": {
+    "ccy_follows_path_first": 0.9347843227068449,
+    "ccy_follows_obic": 0.13907046071478185,
+    "iban_follows_obic": 1.0,
+    "n": 266347.0
+   },
+   "full": {
+    "ccy_follows_path_first": 0.9347570922092541,
+    "ccy_follows_obic": 0.13863791861540653,
+    "iban_follows_obic": 1.0,
+    "n": 498399.0
+   },
+   "half_0": {
+    "ccy_follows_path_first": 0.9350372950376157,
+    "ccy_follows_obic": 0.13834234479773305,
+    "iban_follows_obic": 1.0,
+    "n": 249497.0
+   },
+   "half_1": {
+    "ccy_follows_path_first": 0.9344762195562912,
+    "ccy_follows_obic": 0.13893419900201687,
+    "iban_follows_obic": 1.0,
+    "n": 248902.0
+   }
+  },
+  "formulation": "On replaced rows, CURRENCY_CODE and the local clock follow path[1] (instructing bank); account IBAN and ordering address follow ORDERING_BIC8 (account-servicing bank)",
+  "logic": "compare P(cur = home(path[1])) vs P(cur = home(ORDERING_BIC8)) on rows with path[1] \u2260 ORDERING_BIC8",
+  "sample_size": "498,399 (n)",
+  "effect_size": "see metrics",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Routing / Currency",
+  "hypothesis": "On swapped rows, which BIC drives currency, timing and account format?",
+  "fields": "CURRENCY_CODE, EPOCH_SECONDS, ORDERING_ACCOUNT, BIC8_PATH",
+  "method": "Compare home-currency match, local-night share and IBAN prefix against path[1] vs ORDERING_BIC8.",
+  "counterexamples": "Small share of non-home currency on both sides (vehicle currencies).",
+  "limitations": "Relies on our data-derived country\u2192currency map.",
+  "economic": "The instructing bank books and times the payment; the customer's account stays at the servicing bank.",
+  "chart": "bar: match via path[1] vs header",
+  "deck": "Yes"
+ },
+ {
+  "id": "R1",
+  "title": "Intermediaries K = floor(Exp(1)): P(K=k) = (1-1/e)e^-k",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "MLE continuation q within \u00b10.005 of 1/e and Cohen's w < 0.01 on every split",
+  "confidence": "High",
+  "layer": "Route",
+  "metrics": {
+   "P1": {
+    "n": 4650900.0,
+    "q_mle": 0.3677188734196541,
+    "inv_e": 0.36787944117144233,
+    "cohen_w": 0.0009454129002988552,
+    "chi2": 4.15700024203629,
+    "p_direct": 0.6322999849491496,
+    "ratio_1": 0.367569447939379,
+    "ratio_2": 0.3685513004944793,
+    "ratio_3": 0.36608012450424215,
+    "ratio_4": 0.36780285108921484
+   },
+   "P2": {
+    "n": 5349100.0,
+    "q_mle": 0.36771628450604066,
+    "inv_e": 0.36787944117144233,
+    "cohen_w": 0.0006544176619825681,
+    "chi2": 2.290818812055126,
+    "p_direct": 0.6323523583406554,
+    "ratio_1": 0.3675914615038037,
+    "ratio_2": 0.36755016953732716,
+    "ratio_3": 0.3679929803985068,
+    "ratio_4": 0.36902631187750856
+   },
+   "full": {
+    "n": 10000000.0,
+    "q_mle": 0.3677174885865103,
+    "inv_e": 0.36787944117144233,
+    "cohen_w": 0.0005785024728091008,
+    "chi2": 3.346651110462444,
+    "p_direct": 0.632328,
+    "ratio_1": 0.36758122366872886,
+    "ratio_2": 0.3680157499895668,
+    "ratio_3": 0.3671021036117028,
+    "ratio_4": 0.36845809422509823
+   },
+   "half_0": {
+    "n": 5004013.0,
+    "q_mle": 0.36767966967793064,
+    "inv_e": 0.36787944117144233,
+    "cohen_w": 0.0013225329217963295,
+    "chi2": 8.752485757705902,
+    "p_direct": 0.632260148005211,
+    "ratio_1": 0.3676484067768324,
+    "ratio_2": 0.36860589074777766,
+    "ratio_3": 0.3656750358596401,
+    "ratio_4": 0.3694039608380904
+   },
+   "half_1": {
+    "n": 4995987.0,
+    "q_mle": 0.3677553637162515,
+    "inv_e": 0.36787944117144233,
+    "cohen_w": 0.000839298202071797,
+    "chi2": 3.5192805166376155,
+    "p_direct": 0.6323959609982972,
+    "ratio_1": 0.36751394708306084,
+    "ratio_2": 0.3674245719074116,
+    "ratio_3": 0.3685362760793285,
+    "ratio_4": 0.3675148986510122
+   }
+  },
+  "formulation": "Number of intermediaries K ~ \u230aExp(1)\u230b; PARTICIPANT_COUNT = K + 2",
+  "logic": "P(K = k) = (1 \u2212 e\u207b\u00b9)\u00b7e\u207b\u1d4f; MLE q\u0302 = K\u0304/(1+K\u0304); GOF \u03c7\u00b2 \u2192 Cohen's w",
+  "sample_size": "10,000,000 (n)",
+  "effect_size": "cohen_w = 0.0005785",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Routing",
+  "hypothesis": "Number of intermediaries follows a simple distribution.",
+  "fields": "PARTICIPANT_COUNT, TRANSACTION_TYPE_CODE",
+  "method": "Geometric MLE, successive ratios, chi-square GOF with Cohen's w, per split; per-bank Direct share vs binomial.",
+  "counterexamples": "None beyond sampling noise. Max pc = 22 is the far tail: the rule predicts 10M\u00b7e^-15 \u2248 3.1 rows with pc \u2265 17; 5 are observed (Poisson P(X\u22655 | 3.1) \u2248 0.2).",
+  "limitations": "Correspondent choice is random in the generator; real networks depend on bilateral relationships.",
+  "economic": "Each extra correspondent hop is a fixed-probability event; most payments have a direct relationship.",
+  "chart": "observed vs predicted (log)",
+  "deck": "Yes"
+ },
+ {
+  "id": "R2",
+  "title": "Covered vs Indirect is a per-sending-bank propensity (cover-prone banks \u224861%, others \u22487%, out of sample), independent of route length",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "Cram\u00e9r's V(type\u00d7K) < 0.01 on every split; out-of-sample: banks classed as cover banks on half_0 send >50% Covered on half_1, others <10%",
+  "confidence": "High",
+  "layer": "Route",
+  "metrics": {
+   "P1": {
+    "n": 1710136.0,
+    "pooled_covered_share": 0.11342431245234297,
+    "cramers_v_vs_K": 0.0007086359030832188,
+    "share_k4": 0.113944817300522,
+    "share_k1": 0.11340182342138981,
+    "share_k3": 0.11394757232290402,
+    "share_k2": 0.11318339274059942,
+    "share_k5": 0.11393657073575394
+   },
+   "P2": {
+    "n": 1966584.0,
+    "pooled_covered_share": 0.1128815245115388,
+    "cramers_v_vs_K": 0.0006585386130723023,
+    "share_k3": 0.1128110599078341,
+    "share_k4": 0.11227663105654115,
+    "share_k1": 0.11298440385271163,
+    "share_k2": 0.11264622346314929,
+    "share_k5": 0.11368819177929806
+   },
+   "full": {
+    "n": 3676720.0,
+    "pooled_covered_share": 0.11313398899018691,
+    "cramers_v_vs_K": 0.000513031751529247,
+    "share_k2": 0.11289639998784175,
+    "share_k1": 0.11317852669964837,
+    "share_k3": 0.11333889571802531,
+    "share_k4": 0.11305001685378692,
+    "share_k5": 0.11380386329866271,
+    "oos_cover_banks_share": 0.6142062473256311,
+    "oos_other_banks_share": 0.067044433080395,
+    "cover_banks": 93.0,
+    "other_banks": 2061.0,
+    "country_share_min": 0.030751161176659013,
+    "country_share_max": 0.5037231380518358
+   },
+   "half_0": {
+    "n": 1840175.0,
+    "pooled_covered_share": 0.11287459073185974,
+    "cramers_v_vs_K": 0.0013191404121962334,
+    "share_k1": 0.11302721848725047,
+    "share_k2": 0.11257711280334923,
+    "share_k5": 0.1118432822470034,
+    "share_k4": 0.11114180637809279,
+    "share_k3": 0.1134164620339956
+   },
+   "half_1": {
+    "n": 1836545.0,
+    "pooled_covered_share": 0.1133938999588902,
+    "cramers_v_vs_K": 0.0013780601267064454,
+    "share_k3": 0.11326154844208129,
+    "share_k4": 0.11496261941021736,
+    "share_k2": 0.11321727675672888,
+    "share_k5": 0.11575143652627214,
+    "share_k1": 0.11333010087508903
+   }
+  },
+  "formulation": "Among non-direct routes, TRANSACTION_TYPE = Covered with a sending-bank propensity \u03c0_b (cover banks \u03c0 \u2248 0.6\u20130.8, others \u03c0 \u2248 0.05); independent of K",
+  "logic": "\u03c0_b estimated on half 0; Covered share on half 1 by class; Cram\u00e9r's V(type \u00d7 K)",
+  "sample_size": "3,676,720 (n)",
+  "effect_size": "cramers_v_vs_K = 0.000513",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Routing",
+  "hypothesis": "How Covered vs Indirect is chosen among non-direct routes.",
+  "fields": "TRANSACTION_TYPE_CODE, ORDERING_BIC8, PARTICIPANT_COUNT",
+  "method": "Share by K (Cram\u00e9r's V); per-bank propensity with classes learned on half_0 and tested on half_1; within-country dispersion vs binomial.",
+  "counterexamples": "Original claim 'constant 11.3%' REJECTED by the discovery engine: share ranges 3\u201350% by sending country (IM 50%, SG 6%) and is 378\u00d7 over-dispersed within countries \u2014 the parameter lives at bank level.",
+  "limitations": "Cover-bank class boundary (0.5) is analyst-chosen; cover share of a bank is not explained further.",
+  "economic": "The cover method (MT103 direct + MT202 COV through correspondents) is a bank's operating choice \u2014 some institutions habitually settle by cover.",
+  "chart": "bank-class bars",
+  "deck": "Yes"
+ },
+ {
+  "id": "R4",
+  "title": "Each link hidden with p=0.05: P(N | pc) = 1-0.95^(pc-1)",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "max |obs-pred| over pc 2..7 < 0.006",
+  "confidence": "High",
+  "layer": "Route",
+  "metrics": {
+   "P1": {
+    "max_abs_dev": 0.004334284338479544,
+    "p_link_mle": 0.049890000000000004
+   },
+   "P2": {
+    "max_abs_dev": 0.004393603404973467,
+    "p_link_mle": 0.04993
+   },
+   "full": {
+    "max_abs_dev": 0.0043659744314847315,
+    "p_link_mle": 0.04991
+   },
+   "half_0": {
+    "max_abs_dev": 0.005678473650139071,
+    "p_link_mle": 0.04995000000000001
+   },
+   "half_1": {
+    "max_abs_dev": 0.0030473019414947733,
+    "p_link_mle": 0.049870000000000005
+   }
+  },
+  "formulation": "Each link between consecutive known BICs is hidden ('...') independently with p = 0.05; extra '...' per hidden link ~ Geometric(0.05)",
+  "logic": "P(cont = N | pc) = 1 \u2212 0.95^(pc\u22121); p\u0302 by MLE over pc strata",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "max_abs_dev = 0.004366",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Routing",
+  "hypothesis": "Hidden hops arise per link with constant probability.",
+  "fields": "CONTINUITY_QFLAG, PARTICIPANT_COUNT, BIC8_PATH",
+  "method": "Binomial-per-link model, MLE of p, max deviation per pc.",
+  "counterexamples": "Consecutive '...' chain geometrically (ratio \u2248 0.05).",
+  "limitations": "None material.",
+  "economic": "Each inter-bank leg independently may run outside the observed network.",
+  "chart": "obs vs formula",
+  "deck": "Yes"
+ },
+ {
+  "id": "R3",
+  "title": "Intermediaries chosen in proportion to bank size, not by payment currency",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "corr(log intermediary uses, log payments sent) > 0.9; share in payment-currency zone < 0.25",
+  "confidence": "High",
+  "layer": "Route",
+  "metrics": {
+   "full": {
+    "corr_log": 0.9422562638623636,
+    "share_in_currency_zone": 0.1729924867363686
+   }
+  },
+  "formulation": "Intermediaries are sampled with probability proportional to bank activity, not from the payment-currency zone",
+  "logic": "corr(log uses_as_intermediary, log payments_sent); share of intermediaries whose home currency = payment currency",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Routing",
+  "hypothesis": "Intermediaries are chosen by size (popularity), not by currency zone.",
+  "fields": "BIC8_PATH, CURRENCY_CODE",
+  "method": "Correlation of log usage vs log sending volume; share in currency zone.",
+  "counterexamples": "Currency-zone hypothesis rejected (17% vs >50% expected under it).",
+  "limitations": "Size proxy is sending volume, itself endogenous.",
+  "economic": "Large banks hold the most nostro accounts and act as hubs.",
+  "chart": "scatter",
+  "deck": "Dashboard"
+ },
+ {
+  "id": "C2",
+  "title": "FX count = adjacent known-BIC pairs with different home currencies",
+  "type": "A",
+  "status": "PASS",
+  "criterion": "share_exact >= 0.99999",
+  "confidence": "High",
+  "layer": "Currency & FX",
+  "metrics": {
+   "P1": {
+    "share_exact": 0.9999995699757036,
+    "n": 4650900.0,
+    "exceptions": 2.0,
+    "alt_distinct": 0.9169188759164892
+   },
+   "P2": {
+    "share_exact": 1.0,
+    "n": 5349100.0,
+    "exceptions": 0.0,
+    "alt_distinct": 0.9167557159148267
+   },
+   "full": {
+    "share_exact": 0.9999998,
+    "n": 10000000.0,
+    "exceptions": 2.0,
+    "alt_distinct": 0.9168316
+   },
+   "half_0": {
+    "share_exact": 1.0,
+    "n": 5004013.0,
+    "exceptions": 0.0,
+    "alt_distinct": 0.9166494971136167
+   },
+   "half_1": {
+    "share_exact": 0.9999995996787021,
+    "n": 4995987.0,
+    "exceptions": 2.0,
+    "alt_distinct": 0.9170139954327343
+   }
+  },
+  "formulation": "CURRENCY_CONVERSION_COUNT := \u03a3 over consecutive known BICs of 1[home_ccy(country(b\u1d62)) \u2260 home_ccy(country(b\u1d62\u208a\u2081))]",
+  "logic": "home_ccy = modal currency of the country's sending banks  \u00b7 rulelib.fx_count",
+  "sample_size": "10,000,000 (n)",
+  "effect_size": "share_exact = 0.9999998",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Currency",
+  "hypothesis": "FX count is deterministic in the route.",
+  "fields": "CURRENCY_CONVERSION_COUNT, BIC8_PATH",
+  "method": "Exact rule test on all rows; two rejected alternatives; pure-Python cross-check.",
+  "counterexamples": "2 rows, and they are the only 2 payments in the dataset that touch an Eritrean bank (0000ERA0, receiver). Eritrea never sends, so its home currency cannot be inferred and the rule's input is unobservable there; if ER's currency differs from the sender's, C2 predicts exactly the recorded 1 conversion. Scope: C2 holds wherever every route country has an observable home currency.",
+  "limitations": "Home currency per country is inferred from the data (modal currency).",
+  "economic": "Each correspondent converts into the currency of its next nostro account; conversions happen at currency borders.",
+  "chart": "pc \u00d7 fx heatmap",
+  "deck": "Yes"
+ },
+ {
+  "id": "C3",
+  "title": "Payment currency is drawn from the currencies on the route: first bank \u2248 95% (direct), receiver bank \u2248 3.8%, +\u22482.4 pts per intermediary, outside-route vehicle \u2248 1.3%",
+  "type": "E",
+  "status": "PASS",
+  "criterion": "\u226598% of payments in a route-bank currency on every split; receiver-only share stable across route lengths (range < 0.006); intermediary-only share rises \u2248 linearly per intermediary (slope 0.02\u20130.035)",
+  "confidence": "High",
+  "layer": "Currency & FX",
+  "metrics": {
+   "P1": {
+    "n_sample": 1394910.0,
+    "in_route_share": 0.9872930870091978,
+    "receiver_only_mean": 0.0380891957187202,
+    "receiver_only_range": 0.002455689827659348,
+    "intermediary_slope_per_hop": 0.024473852832685432,
+    "outside_share": 0.012706912990802273,
+    "first_bank_direct": 0.9471442539126569
+   },
+   "P2": {
+    "n_sample": 1605090.0,
+    "in_route_share": 0.9872094399690984,
+    "receiver_only_mean": 0.037729971528076306,
+    "receiver_only_range": 0.0030760904907407224,
+    "intermediary_slope_per_hop": 0.02420473924567581,
+    "outside_share": 0.012790560030901694,
+    "first_bank_direct": 0.947614495353169
+   },
+   "full": {
+    "n_sample": 3000000.0,
+    "in_route_share": 0.9872483333333333,
+    "receiver_only_mean": 0.03789700000000001,
+    "receiver_only_range": 0.0025577089841444384,
+    "intermediary_slope_per_hop": 0.02432998203898117,
+    "outside_share": 0.012751666666666668,
+    "first_bank_direct": 0.9473958706868548
+   },
+   "half_0": {
+    "n_sample": 1502902.0,
+    "in_route_share": 0.9872699617140704,
+    "receiver_only_mean": 0.03770971094589001,
+    "receiver_only_range": 0.003970462566496739,
+    "intermediary_slope_per_hop": 0.024396342593206034,
+    "outside_share": 0.012730038285929487,
+    "first_bank_direct": 0.9476270135459358
+   },
+   "half_1": {
+    "n_sample": 1497098.0,
+    "in_route_share": 0.9872266211029607,
+    "receiver_only_mean": 0.038085015142629276,
+    "receiver_only_range": 0.0015970383652650563,
+    "intermediary_slope_per_hop": 0.0242635033873326,
+    "outside_share": 0.012773378897039472,
+    "first_bank_direct": 0.9471638823055799
+   }
+  },
+  "formulation": "CURRENCY_CODE is drawn from the route: home currency of path[1] (\u224895% if direct), else the receiver bank's currency (\u22483.8%), else an intermediary's currency (\u2248+2.4 pts per intermediary), else a global vehicle (\u22481.3%)",
+  "logic": "position of cur among home currencies of path BICs, by route length; weighted linear slope per intermediary",
+  "sample_size": "3,000,000 (n_sample)",
+  "effect_size": "in_route_share = 0.9872",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Currency",
+  "hypothesis": "Where the payment currency comes from.",
+  "fields": "CURRENCY_CODE, BIC8_PATH",
+  "method": "Currency matched against the home currencies of every bank on the path, by route length; per split on a 3M-row reservoir sample.",
+  "counterexamples": "1.27% of payments (126,857) use a currency of no route bank; 77.7% of them are EUR or USD. H38 (all 10M rows, 5 splits): on routes with no EUR or USD bank the payment is in EUR 1.41% and USD 0.75% of the time, stable across route length (pc 2\u20135) and splits (EUR 1.39\u20131.42%) \u2014 a route-independent vehicle draw that shows up as 'outside' only when that currency is not already on the route. Supported refinement, not a separate validated rule (the EUR/USD set was chosen after inspection).",
+  "limitations": "Direction (route first, then currency) is consistent with the data, not identified; the per-intermediary probability is approximate (linear fit).",
+  "economic": "A payment is denominated in a currency some bank in the chain can book: the sender's (most), the receiver's, or a correspondent's clearing currency; otherwise a global vehicle currency.",
+  "chart": "share by route position",
+  "deck": "Yes"
+ },
+ {
+  "id": "C1",
+  "title": "Payment currency = home currency of the instructing (first-path) bank ~93%",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "share in [0.91,0.95] on every split; per-country share range reported",
+  "confidence": "Medium",
+  "layer": "Currency & FX",
+  "metrics": {
+   "P1": {
+    "home_share": 0.9341701606140747,
+    "n": 4650900.0
+   },
+   "P2": {
+    "home_share": 0.9341464919332224,
+    "n": 5349100.0
+   },
+   "full": {
+    "home_share": 0.9341575,
+    "n": 10000000.0
+   },
+   "half_0": {
+    "home_share": 0.934272752688692,
+    "n": 5004013.0
+   },
+   "half_1": {
+    "home_share": 0.9340420621590889,
+    "n": 4995987.0
+   }
+  },
+  "formulation": "CURRENCY_CODE = home currency of the instructing bank with probability \u2248 0.93 (country-specific 0.73\u20130.98)",
+  "logic": "P(cur = home(path[1])) per split and per country",
+  "sample_size": "10,000,000 (n)",
+  "effect_size": "home_share = 0.9342",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Currency",
+  "hypothesis": "Payment currency is the instructing bank's home currency.",
+  "fields": "CURRENCY_CODE, BIC8_PATH",
+  "method": "Share by split; per-country range.",
+  "counterexamples": "6.6% non-home (EUR, USD, GBP, CHF, CNY, SGD \u2026); RU only 73% home.",
+  "limitations": "Vehicle-currency selection mechanism not fully identified.",
+  "economic": "Local-currency funding; invoices in global vehicle currencies.",
+  "chart": "stacked bars",
+  "deck": "Yes"
+ },
+ {
+  "id": "A1",
+  "title": "ln(amount) = 6 + 2\u00b7[O=B] + 2\u00b7[B=B], \u03c3\u22482.28 (no interaction)",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "intercept\u2208[5.9,6.2], both effects\u2208[1.85,2.15], |interaction|<0.1, \u03c3 spread across cells <0.03",
+  "confidence": "High",
+  "layer": "Value",
+  "metrics": {
+   "P1": {
+    "intercept": 6.062642720509933,
+    "effect_ordering_B": 1.9294897936710367,
+    "effect_beneficiary_B": 1.9638902084085466,
+    "interaction": 0.042627815905449395,
+    "sd_min": 2.283761552996461,
+    "sd_max": 2.2888176880449103
+   },
+   "P2": {
+    "intercept": 6.06210528609884,
+    "effect_ordering_B": 1.933828067518764,
+    "effect_beneficiary_B": 1.9657449366221567,
+    "interaction": 0.035600090224196634,
+    "sd_min": 2.283968602178925,
+    "sd_max": 2.2953124277399435
+   },
+   "full": {
+    "intercept": 6.0623551008389285,
+    "effect_ordering_B": 1.9318101049313237,
+    "effect_beneficiary_B": 1.9648820732967067,
+    "interaction": 0.038869131592845996,
+    "sd_min": 2.2838728683428866,
+    "sd_max": 2.2922950356669474
+   },
+   "half_0": {
+    "intercept": 6.0635700453969426,
+    "effect_ordering_B": 1.9291225094473123,
+    "effect_beneficiary_B": 1.9609304651112547,
+    "interaction": 0.0430939337653129,
+    "sd_min": 2.2842793354330273,
+    "sd_max": 2.292316262111014
+   },
+   "half_1": {
+    "intercept": 6.061137962813352,
+    "effect_ordering_B": 1.9345024691471702,
+    "effect_beneficiary_B": 1.9688337573931838,
+    "interaction": 0.03464382449962411,
+    "sd_min": 2.2810685173371055,
+    "sd_max": 2.2922746420854505
+   }
+  },
+  "formulation": "ln(USD_AMOUNT) ~ Normal(6 + 2\u00b7[ORDERING_TYPE=B] + 2\u00b7[BENEFICIARY_TYPE=B] + c_country + b_bank, \u03c3 \u2248 2.08)",
+  "logic": "2\u00d72 cell means \u2192 intercept, main effects, interaction; \u03c3 per cell",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Amount",
+  "hypothesis": "Log-amount mean is additive in party types.",
+  "fields": "USD_AMOUNT, ORDERING_TYPE, BENEFICIARY_TYPE",
+  "method": "2\u00d72 cell means \u2192 intercept, main effects, interaction; \u03c3 per cell; per split.",
+  "counterexamples": "Amount residual is slightly left-skewed (\u22120.12); 13.5% of fat-finger amounts are integers.",
+  "limitations": "Country and bank effects add structure on top (A2).",
+  "economic": "Commercial flows \u226b personal flows; B2B largest.",
+  "chart": "segment histograms",
+  "deck": "Yes"
+ },
+ {
+  "id": "A2",
+  "title": "Ordering-country effect replicates across independent halves (beneficiary country \u2248 no effect)",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "corr(country effect half_0, half_1) > 0.95; sd(ordering effects) > 3\u00d7sd(beneficiary effects)",
+  "confidence": "Medium",
+  "layer": "Value",
+  "metrics": {
+   "full": {
+    "split_half_corr": 0.9998446273178091,
+    "sd_ordering": 1.091058315667766,
+    "sd_beneficiary": 0.23214224070352266,
+    "countries": 62
+   }
+  },
+  "formulation": "Sending-country level c_country shifts ln(amount) (\u2248 \u22123.2 \u2026 +2.0); beneficiary country has \u2248 no effect",
+  "logic": "country effect on half 0 vs half 1 (r); sd(ordering effects) vs sd(beneficiary effects)",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "split_half_corr = 0.9998446",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Amount",
+  "hypothesis": "Sending-country wealth level shifts amounts; beneficiary country does not.",
+  "fields": "USD_AMOUNT, ORDERING_BIC8",
+  "method": "Country effects estimated separately on random halves; sd comparison.",
+  "counterexamples": "Effects are randomised by design (case text) \u2014 ranking is not real-world.",
+  "limitations": "Bank-level variance (0.22) not decomposed further.",
+  "economic": "GDP-like scaling of ticket size at origin.",
+  "chart": "diverging bars",
+  "deck": "Yes"
+ },
+ {
+  "id": "D1",
+  "title": "Duration = sum of per-bank steps; bank speed class learned on half_0 predicts half_1",
+  "type": "E",
+  "status": "PASS",
+  "criterion": "out-of-sample: fast\u2192fast slow-share < 0.2, any slow bank > 0.9, median(slow,slow)/median(one slow) in [1.6,2.4]",
+  "confidence": "Medium",
+  "layer": "Processing",
+  "metrics": {
+   "fast->fast": {
+    "n": 2111142.0,
+    "slow_share": 0.13415345817571722,
+    "median_s": 27.0
+   },
+   "fast->slow": {
+    "n": 349335.0,
+    "slow_share": 0.9707844905320108,
+    "median_s": 1412.0
+   },
+   "slow->fast": {
+    "n": 493927.0,
+    "slow_share": 0.9617757279921931,
+    "median_s": 1387.0
+   },
+   "slow->slow": {
+    "n": 141699.0,
+    "slow_share": 0.9993295647816851,
+    "median_s": 2641.0
+   },
+   "additivity_ratio": {
+    "value": 1.8871025366202214
+   }
+  },
+  "formulation": "TOTAL_DURATION \u2248 \u03a3 over participating banks of a step: fast (seconds) with probability STP(b), manual otherwise",
+  "logic": "bank classes on half 0; medians by class pair on half 1; additivity ratio med(slow,slow)/med(one slow)",
+  "sample_size": "2,111,142 (n)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Duration",
+  "hypothesis": "Duration is a sum of per-bank processing steps.",
+  "fields": "TOTAL_DURATION, BIC8_PATH",
+  "method": "Bank speed classes learned on half_0, tested on half_1 (out-of-sample).",
+  "counterexamples": "~13% slow cases among fast-fast pairs (each 'fast' bank has a non-zero manual rate).",
+  "limitations": "Exact step distributions not fitted.",
+  "economic": "STP vs manual repair/compliance review.",
+  "chart": "bank-class medians",
+  "deck": "Yes"
+ },
+ {
+  "id": "D2",
+  "title": "Manual (slow) processing is a bank attribute: hour/weekday/amount effects vanish once bank fixed effects are removed",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "after two-way (sender bank, receiver bank) demeaning among fast-fast pairs: residual range across UTC hours < 0.015, weekdays < 0.015, |corr with ln amount| < 0.02",
+  "confidence": "Medium",
+  "layer": "Processing",
+  "metrics": {
+   "full": {
+    "raw_range_by_hour": 0.03687969179377053,
+    "fe_range_by_hour": 0.002912792430995006,
+    "fe_range_by_weekday": 0.0014522289461030803,
+    "fe_corr_ln_amount": -0.0008232138436977369
+   }
+  },
+  "formulation": "Manual-step probability depends on the bank only, not on hour, weekday or amount",
+  "logic": "y = 1[dur > 120]; r = y \u2212 \u0233_sender \u2212 \u0233_receiver + \u0233; range of r\u0304 by hour/weekday",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "fe_range_by_hour = 0.002913",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Duration",
+  "hypothesis": "Manual processing depends on bank, not on time or amount.",
+  "fields": "TOTAL_DURATION, EPOCH_SECONDS, USD_AMOUNT",
+  "method": "Two-way bank fixed-effect demeaning; residual ranges by hour/weekday; corr with amount.",
+  "counterexamples": "Raw hour effect 0.037 is a Simpson artefact (bank mix across time zones).",
+  "limitations": "Linear-probability FE approximation.",
+  "economic": "Automation level is an institution attribute.",
+  "chart": "raw vs adjusted line",
+  "deck": "Yes"
+ },
+ {
+  "id": "T1",
+  "title": "Activity follows the instructing bank's local clock (fixed offsets)",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "night share (01-05h local) < 0.06 on every split vs > 0.15 with UTC",
+  "confidence": "High",
+  "layer": "Temporal",
+  "metrics": {
+   "P1": {
+    "night_local": 0.04583425599820037,
+    "night_utc": 0.12252088737513268
+   },
+   "P2": {
+    "night_local": 0.04603556283759301,
+    "night_utc": 0.12471422958550134
+   },
+   "full": {
+    "night_local": 0.04594193722342745,
+    "night_utc": 0.12369413005912373
+   },
+   "half_0": {
+    "night_local": 0.04592809980985624,
+    "night_utc": 0.1237702570074806
+   },
+   "half_1": {
+    "night_local": 0.04595579814004019,
+    "night_utc": 0.12361787380807467
+   }
+  },
+  "formulation": "Timestamp drawn on the instructing bank's local clock (fixed January UTC offsets): office curve starting 07:00",
+  "logic": "local_hour = (UTC_hour + offset(country(path[1]))) mod 24; night share 01\u201305h",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Time",
+  "hypothesis": "Timestamps are generated in the instructing bank's local time.",
+  "fields": "EPOCH_SECONDS, BIC8_PATH",
+  "method": "Night-share comparison local vs UTC; offset estimation by profile alignment.",
+  "counterexamples": "Offsets are January values (no DST).",
+  "limitations": "Offsets estimated in whole hours (IN shows +5, true +5:30).",
+  "economic": "Office-hours behaviour; cut-off driven submissions.",
+  "chart": "local-hour line",
+  "deck": "Yes"
+ },
+ {
+  "id": "T3",
+  "title": "One weekday shape for all countries (local weekday)",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "max deviation of any country's weekday share from pooled share < 0.01 (countries \u226550k rows)",
+  "confidence": "High",
+  "layer": "Temporal",
+  "metrics": {
+   "full": {
+    "max_dev": 0.0038743391967019924,
+    "countries": 35
+   }
+  },
+  "formulation": "Local weekday shares Mon 18.9 \u00b7 Tue 17.0 \u00b7 Wed 17.0 \u00b7 Thu 18.0 \u00b7 Fri 18.9 \u00b7 Sat 3.6 \u00b7 Sun 6.5 % for every country",
+  "logic": "max |share_country \u2212 share_pooled| over countries with \u2265 50k rows",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "max_dev = 0.003874",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Time",
+  "hypothesis": "Weekday shape is universal.",
+  "fields": "EPOCH_SECONDS",
+  "method": "Max deviation of country weekday shares from pooled.",
+  "counterexamples": "Fri\u2013Sat weekend hypothesis for Gulf/Israel rejected.",
+  "limitations": "-",
+  "economic": "Sunday batch preparation > Saturday.",
+  "chart": "weekday bars",
+  "deck": "Yes"
+ },
+ {
+  "id": "T4",
+  "title": "Weekly volume multiplier is global (shared by all countries)",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "min corr of weekly volume between top-10 countries and the total > 0.98",
+  "confidence": "Medium",
+  "layer": "Temporal",
+  "metrics": {
+   "full": {
+    "min_corr": 0.9992217012033595
+   }
+  },
+  "formulation": "Weekly volume = base \u00d7 level(week), the same level for every country",
+  "logic": "min corr(weekly volume of country, total) over top-10 countries",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "min_corr = 0.9992217",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Time",
+  "hypothesis": "Weekly volume level is global.",
+  "fields": "EPOCH_SECONDS",
+  "method": "Correlation of country weekly series with total.",
+  "counterexamples": "Cause of levels unexplained.",
+  "limitations": "Only 13 full weeks.",
+  "economic": "Possibly calendar-driven (month/quarter end).",
+  "chart": "daily bars",
+  "deck": "Yes"
+ },
+ {
+  "id": "P2",
+  "title": "IBAN prefix always equals BIC country; IBAN used only by IBAN-country banks",
+  "type": "A",
+  "status": "PASS",
+  "criterion": "prefix match == 1; countries with 0<share<0.5 == 0",
+  "confidence": "High",
+  "layer": "Parties & text",
+  "metrics": {
+   "P1": {
+    "o_prefix": 1.0,
+    "b_prefix": 1.0
+   },
+   "P2": {
+    "o_prefix": 1.0,
+    "b_prefix": 1.0
+   },
+   "full": {
+    "o_prefix": 1.0,
+    "b_prefix": 1.0,
+    "countries_ambiguous": 0
+   },
+   "half_0": {
+    "o_prefix": 1.0,
+    "b_prefix": 1.0
+   },
+   "half_1": {
+    "o_prefix": 1.0,
+    "b_prefix": 1.0
+   }
+  },
+  "formulation": "Account is IBAN-formatted only for banks in IBAN countries; IBAN country prefix = BIC country; one IBAN length per country",
+  "logic": "prefix match; per-country IBAN share bimodality; distinct IBAN lengths per country",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Parties",
+  "hypothesis": "Account format follows the IBAN registry by country.",
+  "fields": "ORDERING/BENEFICIARY_ACCOUNT, *_TOKENS",
+  "method": "Prefix match, per-country IBAN share bimodality.",
+  "counterexamples": "IBAN countries still use local formats ~8%.",
+  "limitations": "-",
+  "economic": "Regulatory account-number standards.",
+  "chart": "country bars",
+  "deck": "Yes"
+ },
+ {
+  "id": "P4",
+  "title": "Ordering party lives in its bank's country; beneficiary residence is decoupled from its bank",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "ordering match == 1, beneficiary match < 0.02 on every split",
+  "confidence": "Medium",
+  "layer": "Parties & text",
+  "metrics": {
+   "P1": {
+    "o_match": 1.0,
+    "b_match": 0.009813069145515768
+   },
+   "P2": {
+    "o_match": 1.0,
+    "b_match": 0.009780637552443293
+   },
+   "full": {
+    "o_match": 1.0,
+    "b_match": 0.009795725090947673
+   },
+   "half_0": {
+    "o_match": 1.0,
+    "b_match": 0.009726671531365857
+   },
+   "half_1": {
+    "o_match": 1.0,
+    "b_match": 0.009864885059882124
+   }
+  },
+  "formulation": "Ordering address country = ORDERING_BIC8 country; beneficiary address country is drawn independently of BENEFICIARY_BIC8",
+  "logic": "match rates where a <country_code> token exists",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Parties",
+  "hypothesis": "Ordering parties live in their bank's country; beneficiaries do not.",
+  "fields": "*_TOKENS country codes, BICs",
+  "method": "Match rates where country token present (61%).",
+  "counterexamples": "-",
+  "limitations": "39% of details carry no country token.",
+  "economic": "Generator samples beneficiary residence by population, bank by banking size \u2014 a modelling shortcut.",
+  "chart": "country comparison",
+  "deck": "Yes"
+ },
+ {
+  "id": "P5",
+  "title": "Customer-type mix is a bank attribute: each bank has its own business share of senders and of receivers",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "split-half correlation of bank-level business share > 0.95 on both sides (banks \u2265200 rows per half); within-country dispersion \u226b binomial",
+  "confidence": "High",
+  "layer": "Parties & text",
+  "metrics": {
+   "full": {
+    "sender_split_half_r": 0.9944662440364757,
+    "sender_banks": 2412,
+    "sender_bank_share_min": 0.032012388092538376,
+    "sender_bank_share_max": 1.0,
+    "receiver_split_half_r": 0.9867298320585025,
+    "receiver_banks": 2189,
+    "receiver_bank_share_min": 0.02750965250965251,
+    "receiver_bank_share_max": 0.8639492274564617
+   }
+  },
+  "formulation": "Each bank has its own business-customer share on the sending side and on the receiving side",
+  "logic": "split-half correlation of bank-level P(type = B)",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "sender_split_half_r = 0.9945",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Parties",
+  "hypothesis": "Why the business-customer share varies by country.",
+  "fields": "ORDERING_TYPE, BENEFICIARY_TYPE, BICs",
+  "method": "Bank-level business share on each side, split-half correlation; within-country dispersion vs binomial.",
+  "counterexamples": "Country differences (38\u201396% senders) are bank mix; dispersion 549\u00d7 (senders) and 196\u00d7 (receivers) binomial within countries.",
+  "limitations": "Mechanism behind each bank's share (size? country?) not identified.",
+  "economic": "Banks specialise: corporate banks vs retail banks serve different customer mixes.",
+  "chart": "split-half scatter",
+  "deck": "Dashboard"
+ },
+ {
+  "id": "P1b",
+  "title": "Beneficiary type independent of ordering type",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "|P(bB|oB)-P(bB|oC)| < 0.005",
+  "confidence": "High",
+  "layer": "Parties & text",
+  "metrics": {
+   "P1": {
+    "pB_given_oB": 0.288295332679543,
+    "pB_given_oC": 0.2875720028011771,
+    "diff": 0.0007233298783658748
+   },
+   "P2": {
+    "pB_given_oB": 0.2884672046512103,
+    "pB_given_oC": 0.28705328053731644,
+    "diff": 0.0014139241138938496
+   },
+   "full": {
+    "pB_given_oB": 0.2883872615334523,
+    "pB_given_oC": 0.28729445275936394,
+    "diff": 0.0010928087740883496
+   },
+   "half_0": {
+    "pB_given_oB": 0.28839111074118773,
+    "pB_given_oC": 0.28703408489198756,
+    "diff": 0.0013570258492001663
+   },
+   "half_1": {
+    "pB_given_oB": 0.288383405598695,
+    "pB_given_oC": 0.2875551027863509,
+    "diff": 0.0008283028123441394
+   }
+  },
+  "formulation": "BENEFICIARY_TYPE is drawn independently of ORDERING_TYPE",
+  "logic": "|P(bB | oB) \u2212 P(bB | oC)|",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "diff = 0.001093",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Parties",
+  "hypothesis": "Receiver type independent of sender type.",
+  "fields": "ORDERING_TYPE, BENEFICIARY_TYPE",
+  "method": "Conditional shares by split.",
+  "counterexamples": "-",
+  "limitations": "-",
+  "economic": "Independent sampling per side.",
+  "chart": "-",
+  "deck": "Dashboard"
+ },
+ {
+  "id": "X1",
+  "title": "ROMANCE_SCAM: consumer bursts of 2-8 escalating payments (\u00d7~1.5 each)",
+  "type": "E",
+  "status": "PASS",
+  "criterion": "sender C share == 1; within-series ln step in [0.3,0.5]; every series fully labelled",
+  "confidence": "High",
+  "layer": "Anomaly",
+  "metrics": {
+   "full": {
+    "sender_consumer_share": 1.0,
+    "median_ln_step": 0.40012710559635634,
+    "mean_ln_step": 0.39034448973545743,
+    "labelled_share_in_series": 1.0,
+    "series": 500
+   }
+  },
+  "formulation": "ROMANCE_SCAM: consumer \u2192 same beneficiary, 2\u20138 payments minutes apart, each \u2248 \u00d71.5 the previous; all labelled",
+  "logic": "within-series regression slope of ln(amount) on position",
+  "sample_size": "500 (series)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Anomalies",
+  "hypothesis": "Romance scams are escalating consumer bursts.",
+  "fields": "ANOMALY_TYPE, accounts, amounts, timestamps",
+  "method": "Series reconstruction, within-series log slope, detector precision/recall.",
+  "counterexamples": "Case text says C\u2192C, but receiver type follows base mix (27% B).",
+  "limitations": "Timing (minutes apart) is unrealistic vs real grooming over weeks.",
+  "economic": "Escalating repeated transfers by a groomed victim.",
+  "chart": "escalation line",
+  "deck": "Yes"
+ },
+ {
+  "id": "X2",
+  "title": "DUPLICATE_PAYMENT: 2-5 identical copies (amount, path, duration) within 2h; all copies labelled",
+  "type": "A",
+  "status": "PASS",
+  "criterion": "every group has 1 path & 1 duration; span \u2264 7200s; sizes \u2282 {2..5}",
+  "confidence": "High",
+  "layer": "Anomaly",
+  "metrics": {
+   "full": {
+    "groups": 185,
+    "max_paths": 1,
+    "max_durations": 1,
+    "max_span_s": 7043,
+    "min_size": 2,
+    "max_size": 5
+   }
+  },
+  "formulation": "DUPLICATE_PAYMENT: 2\u20135 identical copies (sender, beneficiary, amount, path, duration) within \u2264 2 h; every copy labelled",
+  "logic": "GROUP BY (oacc, bacc, amt): distinct path = distinct duration = 1; span \u2264 7,043 s",
+  "sample_size": "185 (groups)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Anomalies",
+  "hypothesis": "Duplicates are message replays.",
+  "fields": "all fields",
+  "method": "Exact-key grouping; detector over full data.",
+  "counterexamples": "5 normal groups and 10 romance groups also match the key.",
+  "limitations": "Labelling convention: every copy is labelled, including the original.",
+  "economic": "Back-office race condition resends the same instruction.",
+  "chart": "group sizes",
+  "deck": "Yes"
+ },
+ {
+  "id": "X3",
+  "title": "FAT_FINGER_MISTAKE: amount \u00d7100 or \u00f7100 relative to expectation",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "bimodal log10 residual: both modes within \u00b10.6 of \u00b12; up share in [0.65,0.9]",
+  "confidence": "Medium",
+  "layer": "Anomaly",
+  "metrics": {
+   "full": {
+    "mode_low": -1.95028321850106,
+    "mode_high": 2.435419390965569,
+    "component_sd": 1.1389959227517548,
+    "up_share": 0.772680412371134,
+    "n": 1940.0
+   }
+  },
+  "formulation": "FAT_FINGER_MISTAKE: amount \u00d7 100 (\u224877%) or \u00f7 100 (\u224823%)",
+  "logic": "2-component Gaussian mixture on log10(amount / expected)",
+  "sample_size": "1,940 (n)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Anomalies",
+  "hypothesis": "Fat-finger amounts are scaled by 10^\u00b12.",
+  "fields": "USD_AMOUNT",
+  "method": "Residual vs country+segment expectation, 2-component Gaussian mixture.",
+  "counterexamples": "Cannot separate \u00d7100 from \u00d71000 per row (residual sd \u2248 0.9 log10).",
+  "limitations": "Expectation model has its own noise.",
+  "economic": "Comma/dot decimal-separator confusion.",
+  "chart": "residual histogram",
+  "deck": "Yes"
+ },
+ {
+  "id": "X4",
+  "title": "CEO & ACCOUNT_REPLACEMENT scams pay mule accounts at small banks",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "share of beneficiary accounts receiving only anomalous money > 0.35 (vs < 0.25 for error types)",
+  "confidence": "Medium",
+  "layer": "Anomaly",
+  "metrics": {
+   "full": {
+    "ROMANCE_SCAM": 0.6029886914378029,
+    "ACCOUNT_REPLACEMENT_SCAM": 0.4699537750385208,
+    "CEO_SCAM": 0.4835978835978836,
+    "CUSTOMER_RECALL": 0.1829652996845426,
+    "FAT_FINGER_MISTAKE": 0.2056701030927835,
+    "DUPLICATE_PAYMENT": 0.19293078055964655
+   }
+  },
+  "formulation": "CEO / ACCOUNT_REPLACEMENT scams pay accounts that receive only anomalous money (mules) at small, often manual banks",
+  "logic": "share of beneficiary accounts with zero normal inflows; bank size and STP comparison",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Anomalies",
+  "hypothesis": "CEO/account-replacement scams target mule accounts.",
+  "fields": "BENEFICIARY_ACCOUNT, BENEFICIARY_BIC8",
+  "method": "Share of beneficiary accounts that only receive anomalous money; bank size/STP comparison; stratified duration.",
+  "counterexamples": "No name-swap evidence for account replacement (1/649).",
+  "limitations": "Mule definition is data-driven.",
+  "economic": "Fraud proceeds concentrate in mule accounts at weaker-control banks.",
+  "chart": "mule share bars",
+  "deck": "Yes"
+ },
+ {
+  "id": "X5",
+  "title": "CUSTOMER_RECALL has no observable signature (negative result)",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "no feature differs from normal after Bonferroni (\u03b1=0.05/m)",
+  "confidence": "Low",
+  "layer": "Anomaly",
+  "metrics": {
+   "weekend": {
+    "recall": 0.09779179810725552,
+    "normal": 0.11184275703557912,
+    "z": -0.7937554721582865,
+    "p": 0.42733779958172613,
+    "p_bonf": 1
+   },
+   "domestic": {
+    "recall": 0.05362776025236593,
+    "normal": 0.07113223524401195,
+    "z": -1.2124631466829425,
+    "p": 0.22533514151605205,
+    "p_bonf": 1
+   },
+   "gap": {
+    "recall": 0.11041009463722397,
+    "normal": 0.076720050067077,
+    "z": 2.2537725009717793,
+    "p": 0.024210483620425945,
+    "p_bonf": 0.24210483620425943
+   },
+   "ord_B": {
+    "recall": 0.7760252365930599,
+    "normal": 0.7876368183549395,
+    "z": -0.5054967868810158,
+    "p": 0.613209954662462,
+    "p_bonf": 1
+   },
+   "ben_B": {
+    "recall": 0.26813880126182965,
+    "normal": 0.28816658951261254,
+    "z": -0.787320618181073,
+    "p": 0.4310942029501952,
+    "p_bonf": 1
+   },
+   "direct": {
+    "recall": 0.5899053627760252,
+    "normal": 0.6323315114569267,
+    "z": -1.5666162369032386,
+    "p": 0.11720442027611286,
+    "p_bonf": 1
+   },
+   "slow": {
+    "recall": 0.4637223974763407,
+    "normal": 0.46040255803215735,
+    "z": 0.11858859035158616,
+    "p": 0.9056013051405453,
+    "p_bonf": 1
+   },
+   "fx0": {
+    "recall": 0.10094637223974763,
+    "normal": 0.10868534495267385,
+    "z": -0.4427024533992152,
+    "p": 0.6579809676482946,
+    "p_bonf": 1
+   },
+   "iban_b": {
+    "recall": 0.5141955835962145,
+    "normal": 0.4977501237366899,
+    "z": 0.58561210540018,
+    "p": 0.5581362116121549,
+    "p_bonf": 1
+   },
+   "struct_o": {
+    "recall": 0.15457413249211358,
+    "normal": 0.15526027534890943,
+    "z": -0.03373281174452393,
+    "p": 0.9730902138658815,
+    "p_bonf": 1
+   },
+   "amount_resid_mwu": {
+    "p": 0.8254070951870207,
+    "p_bonf": 1
+   }
+  },
+  "formulation": "CUSTOMER_RECALL rows are statistically indistinguishable from normal rows on all tested features",
+  "logic": "10 two-proportion z-tests + Mann\u2013Whitney on amount residual; Bonferroni",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Anomalies",
+  "hypothesis": "CUSTOMER_RECALL has a signature.",
+  "fields": "all",
+  "method": "10 two-proportion z-tests + Mann-Whitney, Bonferroni.",
+  "counterexamples": "Path-gap share nominal p=0.024, not significant after correction.",
+  "limitations": "Label not documented in official materials.",
+  "economic": "A recall happens after sending, so message fields cannot reveal it.",
+  "chart": "test table",
+  "deck": "Yes (negative result)"
+ },
+ {
+  "id": "X6",
+  "title": "Anomaly label is independent of routing type",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "Cram\u00e9r's V(anomaly \u00d7 ttype) < 0.01",
+  "confidence": "High",
+  "layer": "Anomaly",
+  "metrics": {
+   "full": {
+    "chi2": 204.2574483694058,
+    "p": 4.307168469953908e-37,
+    "dof": 12,
+    "cramers_v": 0.0031957585044039686
+   }
+  },
+  "formulation": "ANOMALY_TYPE is assigned independently of TRANSACTION_TYPE",
+  "logic": "\u03c7\u00b2 + Cram\u00e9r's V on the 7 \u00d7 3 table",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "cramers_v = 0.003196",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Anomalies",
+  "hypothesis": "Anomaly label independent of routing type.",
+  "fields": "ANOMALY_TYPE, TRANSACTION_TYPE_CODE",
+  "method": "Chi-square + Cram\u00e9r's V.",
+  "counterexamples": "-",
+  "limitations": "-",
+  "economic": "Anomalies injected after routing is generated.",
+  "chart": "-",
+  "deck": "Dashboard"
+ },
+ {
+  "id": "F1",
+  "title": "Fingerprint: USD-denominated amounts keep whole-unit roundness (\u224839% .00) while converted currencies have uniform cents (\u22481%)",
+  "type": "D",
+  "status": "PASS",
+  "criterion": "USD whole-unit share > 0.30 and non-USD share in [0.008,0.013] on every split",
+  "confidence": "High",
+  "layer": "Fingerprints",
+  "metrics": {
+   "P1": {
+    "usd_whole_share": 0.38674282316861697,
+    "non_usd_whole_share": 0.010156595635339596,
+    "n_usd": 787151.0
+   },
+   "P2": {
+    "usd_whole_share": 0.38603523054188055,
+    "non_usd_whole_share": 0.009648306857012973,
+    "n_usd": 914888.0
+   },
+   "full": {
+    "usd_whole_share": 0.38636247465539864,
+    "non_usd_whole_share": 0.009884989123689611,
+    "n_usd": 1702039.0
+   },
+   "half_0": {
+    "usd_whole_share": 0.38615577310817734,
+    "non_usd_whole_share": 0.009899894877330376,
+    "n_usd": 851084.0
+   },
+   "half_1": {
+    "usd_whole_share": 0.38656920753741386,
+    "non_usd_whole_share": 0.009870054861539865,
+    "n_usd": 850955.0
+   }
+  },
+  "formulation": "USD-denominated amounts keep whole-unit roundness (\u224839% end .00, \u224816% multiples of 100); non-USD amounts have uniform cents (\u22481%)",
+  "logic": "share of round(amount\u00b7100) mod 100 = 0 by currency = USD; fixed-rate search for EUR/GBP/CHF (negative)",
+  "sample_size": "1,702,039 (n_usd)",
+  "effect_size": "usd_whole_share = 0.3864",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Fingerprints",
+  "hypothesis": "How amounts were produced: drawn in USD, or drawn in the payment currency and converted?",
+  "fields": "USD_AMOUNT, CURRENCY_CODE",
+  "method": "Cents-digit distribution by currency; multiples of 100; search for a fixed FX rate that restores round originals (EUR/GBP/CHF).",
+  "counterexamples": "No single fixed rate restores round originals for EUR/GBP/CHF (best near-integer share \u22482% vs 1.2% baseline) \u2014 conversion mechanism not identified.",
+  "limitations": "Roundness of non-USD originals cannot be observed after conversion.",
+  "economic": "Invoices are typically issued in round units of the invoicing currency; USD is the only currency that needs no conversion to USD.",
+  "chart": "cents by currency",
+  "deck": "Yes"
+ },
+ {
+  "id": "T4b",
+  "title": "Weekly volume levels are piecewise-constant with every change point on a Monday (week boundary)",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "binary segmentation (BIC penalty) on weekday-normalised log volume: \u22651 change point, 100% on Mondays, residual sd < 0.03",
+  "confidence": "High",
+  "layer": "Temporal",
+  "metrics": {
+   "full": {
+    "change_points": 10,
+    "share_on_monday": 1.0,
+    "residual_sd_log": 0.018307311508139548,
+    "segments": 11
+   }
+  },
+  "formulation": "level(week) is piecewise-constant and changes only at week boundaries (Mondays)",
+  "logic": "binary segmentation of weekday-normalised log volume with BIC penalty 2\u00b7ln(n)\u00b7\u03c3\u0302\u00b2",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Time",
+  "hypothesis": "Do weekly levels change at random times or at week boundaries?",
+  "fields": "EPOCH_SECONDS",
+  "method": "Binary segmentation with BIC penalty on weekday-normalised log daily volume (91 full days); residual normality.",
+  "counterexamples": "Several adjacent weeks share a level (segments of 1\u20133 weeks).",
+  "limitations": "13 weeks only; cause of the levels still open (T4).",
+  "economic": "Volume plans are set per week (business calendars), not per day.",
+  "chart": "segmented series",
+  "deck": "Yes"
+ },
+ {
+  "id": "G3",
+  "title": "Intermediaries drawn i.i.d. with replacement \u221d bank size \u2014 predicts the path revisit (loop) rate",
+  "type": "E",
+  "status": "PASS",
+  "criterion": "size exponent \u03b2\u2208[0.9,1.1]; predicted vs observed intermediary-repeat rate within 10% relative for pc 4\u20138 on every split",
+  "confidence": "High",
+  "layer": "Route",
+  "metrics": {
+   "P1": {
+    "max_rel_err": 0.061662815273620386,
+    "pc4_obs": 0.0059591344947035494,
+    "pc8_obs": 0.08221638800607987,
+    "pc7_obs": 0.05677009873060649,
+    "pc5_obs": 0.01722447356331297,
+    "pc6_obs": 0.03344519015659955,
+    "pc4_pred": 0.006006431604233975,
+    "pc8_pred": 0.08707831107578357,
+    "pc7_pred": 0.05881241685109262,
+    "pc5_pred": 0.017947140371469272,
+    "pc6_pred": 0.035643040370772705
+   },
+   "P2": {
+    "max_rel_err": 0.02710493372407563,
+    "pc4_obs": 0.006094011894811009,
+    "pc8_obs": 0.08685104318292092,
+    "pc6_obs": 0.03660914261774705,
+    "pc5_obs": 0.017713691095584957,
+    "pc7_obs": 0.05722441809398331,
+    "pc4_pred": 0.006006431604233975,
+    "pc8_pred": 0.08707831107578357,
+    "pc6_pred": 0.035643040370772705,
+    "pc5_pred": 0.017947140371469272,
+    "pc7_pred": 0.05881241685109262
+   },
+   "full": {
+    "max_rel_err": 0.030599092193084654,
+    "pc7_obs": 0.05701281028576791,
+    "pc6_obs": 0.03514230646234691,
+    "pc4_obs": 0.006031195273245062,
+    "pc5_obs": 0.017486481494455662,
+    "pc8_obs": 0.08468445190879142,
+    "pc7_pred": 0.05881241685109262,
+    "pc6_pred": 0.035643040370772705,
+    "pc4_pred": 0.006006431604233975,
+    "pc5_pred": 0.017947140371469272,
+    "pc8_pred": 0.08707831107578357,
+    "beta": 0.9806959092190132,
+    "collision_prob": 0.006006431604233975
+   },
+   "half_0": {
+    "max_rel_err": 0.05183033810920634,
+    "pc6_obs": 0.03522281886147418,
+    "pc8_obs": 0.08550573514077164,
+    "pc7_obs": 0.05870511680164786,
+    "pc5_obs": 0.017016934017922633,
+    "pc4_obs": 0.006057072220732119,
+    "pc6_pred": 0.035643040370772705,
+    "pc8_pred": 0.08707831107578357,
+    "pc7_pred": 0.05881241685109262,
+    "pc5_pred": 0.017947140371469272,
+    "pc4_pred": 0.006006431604233975
+   },
+   "half_1": {
+    "max_rel_err": 0.05950907892686097,
+    "pc4_obs": 0.006005189496309457,
+    "pc8_obs": 0.08387757715456524,
+    "pc7_obs": 0.0553125440948215,
+    "pc5_obs": 0.017954703012802983,
+    "pc6_obs": 0.035061608749826945,
+    "pc4_pred": 0.006006431604233975,
+    "pc8_pred": 0.08707831107578357,
+    "pc7_pred": 0.05881241685109262,
+    "pc5_pred": 0.017947140371469272,
+    "pc6_pred": 0.035643040370772705
+   }
+  },
+  "formulation": "Intermediaries are drawn i.i.d. with replacement, P(b) \u221d size(b)^\u03b2 with \u03b2 \u2248 1",
+  "logic": "P(revisit | K) = 1 \u2212 \u03a0_{j=1}^{K\u22121}(1 \u2212 j\u00b7\u03a3_b p_b\u00b2)  \u00b7 src/rules.py g3",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "max_rel_err = 0.0306",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Routing graph",
+  "hypothesis": "Loops in paths (a bank visited twice) are a by-product of independent size-weighted intermediary draws.",
+  "fields": "BIC8_PATH",
+  "method": "Birthday-problem prediction from the intermediary collision probability \u03a3p\u00b2; size exponent by log-log fit; per split.",
+  "counterexamples": "pc=8\u20139 within 3%; no residual excess of loops.",
+  "limitations": "Assumes the same size distribution at every position.",
+  "economic": "Hubs appear repeatedly because the generator samples correspondents with replacement \u2014 real routes would avoid loops.",
+  "chart": "obs vs predicted loop rate",
+  "deck": "Yes"
+ },
+ {
+  "id": "G1",
+  "title": "Sender and receiver banks are NOT paired independently (directional affinities) \u2014 independence rejected",
+  "type": "C",
+  "status": "PASS",
+  "criterion": "\u03c7\u00b2/dof > 10 for raw pairs, unique relationships and within country pairs; country affinity symmetry r < 0.3",
+  "confidence": "Low",
+  "layer": "Route",
+  "metrics": {
+   "full": {
+    "chi2_dof_raw": 358.17822696635454,
+    "chi2_dof_unique": 125.39886751993949,
+    "chi2_dof_within_country": 286.57416952019986,
+    "domestic_affinity": 1.2005534465888634,
+    "affinity_symmetry_r": 0.10555752169403472,
+    "country_cramers_v": 0.1224552096937912
+   }
+  },
+  "formulation": "Sender and receiver banks are NOT paired independently; pair counts deviate from n_i\u00b7n_j/N even within country pairs and unique relationships",
+  "logic": "Pearson \u03c7\u00b2/dof of O vs E = n_o\u00b7n_b/N over pairs with E \u2265 5",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "chi2_dof_raw = 358.2",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Routing graph",
+  "hypothesis": "Sender and receiver banks are paired independently (configuration model).",
+  "fields": "ORDERING_BIC8, BENEFICIARY_BIC8",
+  "method": "Pearson \u03c7\u00b2/dof of pair counts vs product-of-margins expectation, on raw payments, unique account relationships and within country pairs; affinity symmetry.",
+  "counterexamples": "Independence REJECTED in all three; domestic pairs 1.2\u00d7 expected; affinities directional (r = 0.11).",
+  "limitations": "Mechanism of the affinity (bank-level preference lists?) not identified.",
+  "economic": "Real correspondent networks are relationship-driven; the generator encodes directional bank-to-bank preferences.",
+  "chart": "pair O/E scatter",
+  "deck": "Yes (partial result)"
+ },
+ {
+  "id": "A3",
+  "title": "Within-country log-amount residual is Normal (lognormal amounts, no power-law tail)",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "|skew|<0.05, |excess kurtosis|<0.1, KS D<0.01 on every split; Hill \u03b1 drifts (>0.5 between k=100 and k=100k)",
+  "confidence": "High",
+  "layer": "Value",
+  "metrics": {
+   "full": {
+    "sd": 2.080092182167784,
+    "skew": -0.023951931630857536,
+    "excess_kurtosis": 0.006826938001923022,
+    "ks_D": 0.003461770361023575,
+    "hill_alpha_k100": 2.209183822581445,
+    "hill_alpha_k100000": 1.2115470979177383
+   },
+   "half_0": {
+    "sd": 2.081495249893029,
+    "skew": -0.019868410558434135,
+    "excess_kurtosis": -0.02221430390537016,
+    "ks_D": 0.0036730456669697986
+   },
+   "half_1": {
+    "sd": 2.076646691039119,
+    "skew": -0.02831455790978605,
+    "excess_kurtosis": 0.036943323883031454,
+    "ks_D": 0.0031048604854425066
+   },
+   "P1": {
+    "sd": 2.086766543220941,
+    "skew": -0.026968138428870858,
+    "excess_kurtosis": 0.0022994357037919855,
+    "ks_D": 0.0028976943183837145
+   },
+   "P2": {
+    "sd": 2.072464080272538,
+    "skew": -0.020742387918885035,
+    "excess_kurtosis": 0.00886860895771191,
+    "ks_D": 0.004458321387071251
+   }
+  },
+  "formulation": "Within-country residual of ln(amount) is Normal \u2192 amounts lognormal; no power-law tail",
+  "logic": "skew, excess kurtosis, KS D vs N(0,1); Hill \u03b1(k) drift; model exceedances",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "ks_D = 0.003462",
+  "validation": "PASS on 5 splits (P1, P2, full, half_0, half_1)",
+  "group": "Amount",
+  "hypothesis": "Amounts are lognormal, not heavy-tailed power law.",
+  "fields": "USD_AMOUNT",
+  "method": "Within-country residual moments, KS vs Normal, Hill estimator drift, model-implied exceedances $100k\u2013$1bn.",
+  "counterexamples": "Exceedance ratio 0.86 at $100M (132 vs 154 predicted, z\u2248\u22121.7).",
+  "limitations": "Fat-finger rows excluded; top 1,000 amounts are 26.5% fat finger.",
+  "economic": "Payment sizes multiply many factors (firm size, invoice size) \u2192 lognormal; extreme tickets come from errors, not a fat natural tail.",
+  "chart": "Q-Q / Hill plot",
+  "deck": "Dashboard"
+ },
+ {
+  "id": "D3",
+  "title": "Manual processing step \u2248 Gamma(shape\u22482, scale\u2248820 s); fast step pair \u2248 Gamma(3, 8.7 s)",
+  "type": "B",
+  "status": "PASS",
+  "criterion": "manual-step gamma shape\u2208[1.6,2.5] and KS D<0.05 better than lognormal; fast-pair gamma shape\u2208[2.5,3.6], KS D<0.05",
+  "confidence": "Medium",
+  "layer": "Processing",
+  "metrics": {
+   "full": {
+    "manual_shape": 2.044867037227066,
+    "manual_scale_s": 817.0977718418663,
+    "manual_ks_gamma": 0.023209153855775558,
+    "manual_ks_lognormal": 0.06561256719714392,
+    "fast_pair_shape": 3.0616980100726954,
+    "fast_pair_scale_s": 8.733998510354303,
+    "fast_ks": 0.03104860516587704,
+    "n_manual": 101844,
+    "n_fast": 222900
+   }
+  },
+  "formulation": "Manual step ~ Gamma(k \u2248 2, \u03b8 \u2248 817 s); two fast steps ~ Gamma(k \u2248 3.1, \u03b8 \u2248 8.7 s)",
+  "logic": "MLE gamma fit (loc = 0) vs lognormal; KS D",
+  "sample_size": "10,000,000 (full data)",
+  "effect_size": "see metrics",
+  "validation": "PASS \u00b7 full-data / out-of-sample test",
+  "group": "Duration",
+  "hypothesis": "The manual step has a specific distribution.",
+  "fields": "TOTAL_DURATION",
+  "method": "Gamma vs lognormal MLE fits with KS on manual-step and fast-pair durations.",
+  "counterexamples": "Manual tail up to 21,649 s on multi-hop routes.",
+  "limitations": "Fitted on pc=2 rows with exactly one slow bank.",
+  "economic": "Manual handling \u2248 two exponential stages (queue + review) \u2192 Gamma(2).",
+  "chart": "fitted density",
+  "deck": "Dashboard"
+ }
+]

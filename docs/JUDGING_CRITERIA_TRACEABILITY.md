@@ -1,0 +1,10 @@
+# Judging criteria traceability
+
+Official weights only (JC): Insight Quality 45% · Evidence, Methodology & Data Integrity 23% · Communication 20% · Interpretation & Economic Reasoning 12%.
+
+| Criterion | What judges expect | Where in ORVANTA (web) | Dashboard page | Slide | Supporting record | How to verify | Still incomplete |
+|---|---|---|---|---|---|---|---|
+| Insight 45% | specific rules, quantified, scoped, with exceptions and interactions | Guided tour; Generator Blueprint; Rule explorer; Payment Intelligence pages | 3–8, 11–14 | 2, 6, 8–15 | `findings/rule_evidence_register.md`, `confirmed_rules.md` | Forensic Replay shows exact counts and records (C2's 2 exceptions); validation split matrix | G1, T4, X5 mechanisms open (stated); H38 supported, not validated |
+| Evidence & method 23% | data prep, reproducibility, claim→evidence, independent validation, counterexamples, honest limits | Data quality; Lineage; Validation centre; Evidence Ledger; Forensic Replay; Statistical tests (per-family BH); Counterexamples | 1, 2, 9, 10 | 3, 4, 5, 7, 16 | `validation_report.md`, `DATA_QUALITY_REPORT.md`, `DATA_PIPELINE.md`, `SINGLE_SOURCE_OF_TRUTH.md` | `python run_all.py` reproduces every artefact; 90+ tests including cross-checks | browser Rule Builder replicates by period only |
+| Communication 20% | clear narrative, standalone dashboards, readable charts, consistent terms | 2-minute tour; ★ judge journey; responsive on phones/tablets/desktops; data table under every chart | all | 1, 2, 17 | `MOBILE_QA_REPORT.md`, `COMPLETE_UI_AUDIT.md` | responsive audit (833 renders), screenshots in `docs/responsive-screenshots/` | PDF rule cards dense; slide polish by pitch team |
+| Economics 12% | plausible mechanisms consistent with evidence; observation vs interpretation; cited sources | "Reading" on every rule; Limitations & economics page; tour stage 3 reading | every feature page | 8–15, 17 | `economic_interpretation.md`, `source_register.md` | readings are labelled interpretation; 5 references verified 14 Nov 2026 | scam readings uncited (general knowledge) |

@@ -1,0 +1,62 @@
+claim_no,page,kind,claim,rule_ids,confidence,source,evidence_id
+1,1,kpi,"10,000,000 — payments · 0 dropped · reconciled at every stage",,,outputs/evidence/evidence.json (ingest reconciliation),
+2,1,kpi,34 rules — 34/34 pass their validator on 5 splits,,,"validation.json (status per rule, 5 splits)",
+3,1,kpi,8 · 14 · 9 · 3 — validated · strongly supported · supported · inconclusive,,,src/levels.py,
+4,1,kpi,"99.99998% — FX rule (C2) exact: 9,999,998 rows",C2,,validation.json rules[C2].metrics.full,EV-RULE-009
+5,1,kpi,"100% — SQL = independent Python (R6, R7, C2)",R6 R7 C2,,validation.json cross_check (SQL vs Python),
+6,1,kpi,"7,006 — labelled anomalies · 6 types",,,evidence.json anom_profile,
+7,1,headline,We reconstructed the hidden generator behind 10 million synthetic cross-border payments,,,validation.json (34 rules); levels.py; webdata ledger,
+8,2,headline,276 feature pairs scanned: every strong dependency is explained by a rule or by rules combined,,,outputs/evidence/discovery.json; atlas.json,
+9,3,headline,"Payments follow the instructing bank's local office clock, scaled by one global weekly multiplier",T1 T3 T4 T4b,,see evidence-table rows on the same page,EV-RULE-016 EV-RULE-017 EV-RULE-018 EV-RULE-030
+10,3,evidence-table,"T1: night share, local clock = 4.6% (5-split range 4.6% – 4.6%)",T1,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[T1].metrics,EV-RULE-016
+11,3,evidence-table,T3: max country deviation = 0.4% (5-split range full only),T3,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[T3].metrics,EV-RULE-017
+12,3,evidence-table,T4: min corr of country weekly series = 0.999 (5-split range full only),T4,INCONCLUSIVE,outputs/evidence/validation.json rules[T4].metrics,EV-RULE-018
+13,3,evidence-table,T4b: change points on Mondays = 100% (5-split range full only),T4b,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[T4b].metrics,EV-RULE-030
+14,4,headline,"FX conversions equal the currency borders along the route — exact on 9,999,998 of 10,000,000 payments",C2 C3 C1 F1,,see evidence-table rows on the same page,EV-RULE-009 EV-RULE-010 EV-RULE-011 EV-RULE-029
+15,4,evidence-table,C2: exact-match share = 0.9999998 (5-split range 0.9999996 – 1 (every row)),C2,VALIDATED,outputs/evidence/validation.json rules[C2].metrics,EV-RULE-009
+16,4,evidence-table,C3: currency in a route-bank currency = 98.7% (5-split range 98.7% – 98.7%),C3,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[C3].metrics,EV-RULE-010
+17,4,evidence-table,C1: currency = home of path[1] = 93.4% (5-split range 93.4% – 93.4%),C1,SUPPORTED,outputs/evidence/validation.json rules[C1].metrics,EV-RULE-011
+18,4,evidence-table,F1: USD amounts ending .00 = 38.6% (5-split range 38.6% – 38.7%),F1,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[F1].metrics,EV-RULE-029
+19,5,headline,Route length is a chain with a 1/e continuation probability; every link hides with p = 0.05,R1 R2 R4 R6 R7,,see evidence-table rows on the same page,EV-RULE-001 EV-RULE-002 EV-RULE-005 EV-RULE-006 EV-RULE-007
+20,5,evidence-table,R1: continuation q (1/e = 0.3679) = 0.3677 (5-split range 0.3677 – 0.3678),R1,VALIDATED,outputs/evidence/validation.json rules[R1].metrics,EV-RULE-005
+21,5,evidence-table,R2: pooled covered share = 11.31% (5-split range 11.29% – 11.34%),R2,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[R2].metrics,EV-RULE-006
+22,5,evidence-table,R4: per-link hidden p = 0.0499 (5-split range 0.0499 – 0.0500),R4,VALIDATED,outputs/evidence/validation.json rules[R4].metrics,EV-RULE-007
+23,5,evidence-table,R6: exact-match share = 1 (every row) (5-split range identical),R6,VALIDATED,outputs/evidence/validation.json rules[R6].metrics,EV-RULE-001
+24,5,evidence-table,R7: exact-match share = 1 (every row) (5-split range identical),R7,VALIDATED,outputs/evidence/validation.json rules[R7].metrics,EV-RULE-002
+25,6,headline,On 5% of payments a different bank instructs — and the two banks drive different fields,R5 R5b R3 P5,,see evidence-table rows on the same page,EV-RULE-003 EV-RULE-004 EV-RULE-008 EV-RULE-021
+26,6,evidence-table,R5: P(path[1] ≠ header) = 4.98% (5-split range 4.98% – 4.99%),R5,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[R5].metrics,EV-RULE-003
+27,6,evidence-table,R5b: currency follows path[1] = 93.5% (5-split range 93.4% – 93.5%),R5b,SUPPORTED,outputs/evidence/validation.json rules[R5b].metrics,EV-RULE-004
+28,6,evidence-table,"R3: corr(log uses, log size) = 0.94 (5-split range full only)",R3,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[R3].metrics,EV-RULE-008
+29,6,evidence-table,P5: split-half r (bank mix) = 0.994 (5-split range full only),P5,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[P5].metrics,EV-RULE-021
+30,7,headline,"Duration is a sum of per-bank steps: seconds if straight-through, ~24 minutes if manual",D1 D2 D3,,see evidence-table rows on the same page,EV-RULE-014 EV-RULE-015 EV-RULE-034
+31,7,evidence-table,D1: two-slow ÷ one-slow median (out of sample) = 1.89 (5-split range half_0 → half_1),D1,SUPPORTED,outputs/evidence/validation.json rules[D1].metrics,EV-RULE-014
+32,7,evidence-table,D2: hour range after bank FE = 0.003 (5-split range full only),D2,SUPPORTED,outputs/evidence/validation.json rules[D2].metrics,EV-RULE-015
+33,7,evidence-table,D3: KS manual step vs Gamma = 0.023 (5-split range full only),D3,SUPPORTED,outputs/evidence/validation.json rules[D3].metrics,EV-RULE-034
+34,8,headline,"The route network is a size-weighted pseudograph: loops are predictable, pairings are not independent",G3 G1,,see evidence-table rows on the same page,EV-RULE-031 EV-RULE-032
+35,8,evidence-table,G3: max loop-rate error = 3.1% (5-split range 2.7% – 6.2%),G3,VALIDATED,outputs/evidence/validation.json rules[G3].metrics,EV-RULE-031
+36,8,evidence-table,G1: χ²/dof vs independence = 358 (5-split range full only),G1,INCONCLUSIVE,outputs/evidence/validation.json rules[G1].metrics,EV-RULE-032
+37,9,headline,"Fingerprints: USD keeps round amounts, volume steps on Mondays, identifiers follow fixed grammars",F1 T4b,,see evidence-table rows on the same page,EV-RULE-029 EV-RULE-030
+38,9,evidence-table,F1: USD amounts ending .00 = 38.6% (5-split range 38.6% – 38.7%),F1,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[F1].metrics,EV-RULE-029
+39,9,evidence-table,T4b: change points on Mondays = 100% (5-split range full only),T4b,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[T4b].metrics,EV-RULE-030
+40,10,headline,Parameters sit on their theoretical values; distributions survive tail checks; replication holds,A3 D3 R1 R4,,see evidence-table rows on the same page,EV-RULE-005 EV-RULE-007 EV-RULE-033 EV-RULE-034
+41,10,evidence-table,A3: KS D vs normal = 0.0035 (5-split range 0.0029 – 0.0045),A3,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[A3].metrics,EV-RULE-033
+42,10,evidence-table,D3: KS manual step vs Gamma = 0.023 (5-split range full only),D3,SUPPORTED,outputs/evidence/validation.json rules[D3].metrics,EV-RULE-034
+43,10,evidence-table,R1: continuation q (1/e = 0.3679) = 0.3677 (5-split range 0.3677 – 0.3678),R1,VALIDATED,outputs/evidence/validation.json rules[R1].metrics,EV-RULE-005
+44,10,evidence-table,R4: per-link hidden p = 0.0499 (5-split range 0.0499 – 0.0500),R4,VALIDATED,outputs/evidence/validation.json rules[R4].metrics,EV-RULE-007
+45,11,headline,ln(amount) = 6 + 2·[sender is business] + 2·[receiver is business] + sending-country level,A1 A2 A3,,see evidence-table rows on the same page,EV-RULE-012 EV-RULE-013 EV-RULE-033
+46,11,evidence-table,A1: sender-business effect (ln) = 1.932 (5-split range 1.929 – 1.935),A1,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[A1].metrics,EV-RULE-012
+47,11,evidence-table,A2: split-half r of country effects = 0.9998 (5-split range full only),A2,SUPPORTED,outputs/evidence/validation.json rules[A2].metrics,EV-RULE-013
+48,11,evidence-table,A3: KS D vs normal = 0.0035 (5-split range 0.0029 – 0.0045),A3,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[A3].metrics,EV-RULE-033
+49,12,headline,Party text follows MT conventions; IBANs follow the bank's country; beneficiary residence is decoupled,P2 P4 P1b,,see evidence-table rows on the same page,EV-RULE-019 EV-RULE-020 EV-RULE-022
+50,12,evidence-table,P2: IBAN prefix = BIC country = 100.0% (5-split range identical),P2,VALIDATED,outputs/evidence/validation.json rules[P2].metrics,EV-RULE-019
+51,12,evidence-table,P4: ordering address = bank country = 100.0% (5-split range identical),P4,SUPPORTED,outputs/evidence/validation.json rules[P4].metrics,EV-RULE-020
+52,12,evidence-table,P1b: P(B|sender B) − P(B|sender C) = 0.0011 (5-split range 0.0007 – 0.0014),P1b,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[P1b].metrics,EV-RULE-022
+53,13,headline,Fraud labels carry injection signatures: escalating bursts and mule accounts at small banks,X1 X4 X6,,see evidence-table rows on the same page,EV-RULE-023 EV-RULE-026 EV-RULE-028
+54,13,evidence-table,X1: median ln step in burst = 0.40 (5-split range full only),X1,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[X1].metrics,EV-RULE-023
+55,13,evidence-table,X4: CEO: only-anomalous payees = 48.4% (5-split range full only),X4,SUPPORTED,outputs/evidence/validation.json rules[X4].metrics,EV-RULE-026
+56,13,evidence-table,X6: Cramér's V vs routing type = 0.0032 (5-split range full only),X6,STRONGLY SUPPORTED,outputs/evidence/validation.json rules[X6].metrics,EV-RULE-028
+57,14,headline,Errors are mechanical copies and decimal shifts; CUSTOMER_RECALL leaves no trace,X2 X3 X5,,see evidence-table rows on the same page,EV-RULE-024 EV-RULE-025 EV-RULE-027
+58,14,evidence-table,X2: duplicate groups = 185 (5-split range full only),X2,VALIDATED,outputs/evidence/validation.json rules[X2].metrics,EV-RULE-024
+59,14,evidence-table,X3: share ×100 (vs ÷100) = 77.3% (5-split range full only),X3,SUPPORTED,outputs/evidence/validation.json rules[X3].metrics,EV-RULE-025
+60,14,evidence-table,X5: features differing from normal (11 tested) = 0 (5-split range Bonferroni and BH),X5,INCONCLUSIVE,outputs/evidence/validation.json rules[X5].metrics,EV-RULE-027
+61,15,headline,"The reconstructed generator in ten stages — what is exact, what is fitted, what is still open",,,validation.json; levels.py; src/ledger.py SECTIONS,

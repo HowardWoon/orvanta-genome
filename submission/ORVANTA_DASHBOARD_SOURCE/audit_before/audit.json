@@ -1,0 +1,182 @@
+[
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 1,
+  "blank_share": 0.426,
+  "largest_gap": 177
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 2,
+  "blank_share": 0.242,
+  "largest_gap": 25
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 3,
+  "blank_share": 0.27,
+  "largest_gap": 25
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 4,
+  "blank_share": 0.246,
+  "largest_gap": 17
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 5,
+  "blank_share": 0.161,
+  "largest_gap": 16
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 6,
+  "blank_share": 0.242,
+  "largest_gap": 25
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 7,
+  "blank_share": 0.267,
+  "largest_gap": 17
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 8,
+  "blank_share": 0.289,
+  "largest_gap": 25
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 9,
+  "blank_share": 0.255,
+  "largest_gap": 25
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 10,
+  "blank_share": 0.203,
+  "largest_gap": 25
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 11,
+  "blank_share": 0.281,
+  "largest_gap": 17
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 12,
+  "blank_share": 0.233,
+  "largest_gap": 17
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 13,
+  "blank_share": 0.228,
+  "largest_gap": 17
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10.1333,
+  "h": 864,
+  "w": 1536,
+  "page": 14,
+  "blank_share": 0.224,
+  "largest_gap": 17
+ },
+ {
+  "overflow": [
+   0,
+   0
+  ],
+  "min_font_px": 10,
+  "h": 864,
+  "w": 1536,
+  "page": 15,
+  "blank_share": 0.617,
+  "largest_gap": 192
+ }
+]

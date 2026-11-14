@@ -1,0 +1,542 @@
+{
+ "nodes": [
+  {
+   "id": "size",
+   "label": "Bank size",
+   "kind": "latent",
+   "x": 60,
+   "y": 70
+  },
+  {
+   "id": "calendar",
+   "label": "Calendar levels",
+   "kind": "latent",
+   "x": 60,
+   "y": 420
+  },
+  {
+   "id": "sbank",
+   "label": "ORDERING_BIC8",
+   "kind": "field",
+   "x": 230,
+   "y": 140
+  },
+  {
+   "id": "rbank",
+   "label": "BENEFICIARY_BIC8",
+   "kind": "field",
+   "x": 230,
+   "y": 300
+  },
+  {
+   "id": "otype",
+   "label": "ORDERING_TYPE",
+   "kind": "field",
+   "x": 420,
+   "y": 40
+  },
+  {
+   "id": "btype",
+   "label": "BENEFICIARY_TYPE",
+   "kind": "field",
+   "x": 420,
+   "y": 360
+  },
+  {
+   "id": "ibank",
+   "label": "Instructing bank",
+   "kind": "latent",
+   "x": 420,
+   "y": 140
+  },
+  {
+   "id": "inter",
+   "label": "Intermediaries",
+   "kind": "latent",
+   "x": 420,
+   "y": 230
+  },
+  {
+   "id": "path",
+   "label": "BIC8_PATH",
+   "kind": "field",
+   "x": 610,
+   "y": 190
+  },
+  {
+   "id": "time",
+   "label": "EPOCH_SECONDS",
+   "kind": "field",
+   "x": 610,
+   "y": 420
+  },
+  {
+   "id": "pc",
+   "label": "PARTICIPANT_COUNT",
+   "kind": "field",
+   "x": 800,
+   "y": 110
+  },
+  {
+   "id": "cont",
+   "label": "CONTINUITY_QFLAG",
+   "kind": "field",
+   "x": 800,
+   "y": 30
+  },
+  {
+   "id": "fx",
+   "label": "CURRENCY_CONVERSION_COUNT",
+   "kind": "field",
+   "x": 800,
+   "y": 200
+  },
+  {
+   "id": "cur",
+   "label": "CURRENCY_CODE",
+   "kind": "field",
+   "x": 800,
+   "y": 290
+  },
+  {
+   "id": "ttype",
+   "label": "TRANSACTION_TYPE_CODE",
+   "kind": "field",
+   "x": 990,
+   "y": 110
+  },
+  {
+   "id": "dur",
+   "label": "TOTAL_DURATION",
+   "kind": "field",
+   "x": 990,
+   "y": 230
+  },
+  {
+   "id": "amt",
+   "label": "USD_AMOUNT",
+   "kind": "field",
+   "x": 990,
+   "y": 360
+  },
+  {
+   "id": "anom",
+   "label": "ANOMALY_TYPE",
+   "kind": "field",
+   "x": 1180,
+   "y": 400
+  },
+  {
+   "id": "acct",
+   "label": "ACCOUNTS (IBAN/local)",
+   "kind": "field",
+   "x": 230,
+   "y": 470
+  },
+  {
+   "id": "text",
+   "label": "DETAILS / TOKENS",
+   "kind": "field",
+   "x": 420,
+   "y": 500
+  },
+  {
+   "id": "bcust",
+   "label": "Beneficiary address country",
+   "kind": "field",
+   "x": 610,
+   "y": 520
+  }
+ ],
+ "edges": [
+  {
+   "source": "size",
+   "target": "inter",
+   "kind": "stochastic",
+   "rules": [
+    "G3",
+    "R3"
+   ],
+   "evidence": "P \u221d size^\u03b2, \u03b2 = 0.98; loop rate error 3.1%",
+   "status": "PASS"
+  },
+  {
+   "source": "sbank",
+   "target": "ibank",
+   "kind": "stochastic",
+   "rules": [
+    "R5",
+    "R5b"
+   ],
+   "evidence": "replaced w.p. 0.0498 (independent of other end)",
+   "status": "PASS"
+  },
+  {
+   "source": "rbank",
+   "target": "path",
+   "kind": "stochastic",
+   "rules": [
+    "R5"
+   ],
+   "evidence": "last hop \u2260 BENEFICIARY_BIC8 w.p. 0.0499",
+   "status": "PASS"
+  },
+  {
+   "source": "ibank",
+   "target": "path",
+   "kind": "deterministic",
+   "rules": [
+    "R5b"
+   ],
+   "evidence": "path starts at the instructing bank",
+   "status": "PASS"
+  },
+  {
+   "source": "inter",
+   "target": "path",
+   "kind": "stochastic",
+   "rules": [
+    "R1",
+    "G3"
+   ],
+   "evidence": "K = \u230aExp(1)\u230b intermediaries inserted",
+   "status": "PASS"
+  },
+  {
+   "source": "path",
+   "target": "pc",
+   "kind": "deterministic",
+   "rules": [
+    "R6"
+   ],
+   "evidence": "pc = known BICs (exact 1.000000)",
+   "status": "PASS"
+  },
+  {
+   "source": "path",
+   "target": "cont",
+   "kind": "deterministic",
+   "rules": [
+    "R7"
+   ],
+   "evidence": "N \u21d4 '...' present (exact); each link hidden w.p. 0.05 (R4)",
+   "status": "PASS"
+  },
+  {
+   "source": "path",
+   "target": "fx",
+   "kind": "deterministic",
+   "rules": [
+    "C2"
+   ],
+   "evidence": "FX = currency borders, exceptions 2 of 10M",
+   "status": "PASS"
+  },
+  {
+   "source": "pc",
+   "target": "ttype",
+   "kind": "deterministic",
+   "rules": [
+    "R1"
+   ],
+   "evidence": "Direct \u21d4 pc = 2",
+   "status": "PASS"
+  },
+  {
+   "source": "sbank",
+   "target": "ttype",
+   "kind": "stochastic",
+   "rules": [
+    "R2"
+   ],
+   "evidence": "cover banks 61% Covered vs 6.7% (out of sample)",
+   "status": "PASS"
+  },
+  {
+   "source": "path",
+   "target": "cur",
+   "kind": "stochastic",
+   "rules": [
+    "C3"
+   ],
+   "evidence": "98.7% in a route currency; +2.4 pts per intermediary",
+   "status": "PASS"
+  },
+  {
+   "source": "ibank",
+   "target": "cur",
+   "kind": "stochastic",
+   "rules": [
+    "C1",
+    "C3"
+   ],
+   "evidence": "home currency of instructing bank 93.4%",
+   "status": "PASS"
+  },
+  {
+   "source": "ibank",
+   "target": "time",
+   "kind": "stochastic",
+   "rules": [
+    "T1"
+   ],
+   "evidence": "local office clock; night share 4.6% local vs 12.4% UTC",
+   "status": "PASS"
+  },
+  {
+   "source": "calendar",
+   "target": "time",
+   "kind": "stochastic",
+   "rules": [
+    "T3",
+    "T4",
+    "T4b"
+   ],
+   "evidence": "weekly steps, 10 change points all on Monday",
+   "status": "PASS"
+  },
+  {
+   "source": "otype",
+   "target": "amt",
+   "kind": "stochastic",
+   "rules": [
+    "A1"
+   ],
+   "evidence": "+1.93 ln units if business",
+   "status": "PASS"
+  },
+  {
+   "source": "btype",
+   "target": "amt",
+   "kind": "stochastic",
+   "rules": [
+    "A1"
+   ],
+   "evidence": "+1.96 ln units if business",
+   "status": "PASS"
+  },
+  {
+   "source": "sbank",
+   "target": "amt",
+   "kind": "stochastic",
+   "rules": [
+    "A2"
+   ],
+   "evidence": "country level, split-half r = 0.9998",
+   "status": "PASS"
+  },
+  {
+   "source": "sbank",
+   "target": "otype",
+   "kind": "stochastic",
+   "rules": [
+    "P5"
+   ],
+   "evidence": "bank customer mix, split-half r = 0.994",
+   "status": "PASS"
+  },
+  {
+   "source": "rbank",
+   "target": "btype",
+   "kind": "stochastic",
+   "rules": [
+    "P5"
+   ],
+   "evidence": "bank customer mix, split-half r = 0.987",
+   "status": "PASS"
+  },
+  {
+   "source": "sbank",
+   "target": "dur",
+   "kind": "stochastic",
+   "rules": [
+    "D1",
+    "D3"
+   ],
+   "evidence": "bank STP rate; manual step ~ Gamma(2, ~817 s)",
+   "status": "PASS"
+  },
+  {
+   "source": "rbank",
+   "target": "dur",
+   "kind": "stochastic",
+   "rules": [
+    "D1"
+   ],
+   "evidence": "additive per bank, ratio 1.89 out of sample",
+   "status": "PASS"
+  },
+  {
+   "source": "inter",
+   "target": "dur",
+   "kind": "stochastic",
+   "rules": [
+    "D1"
+   ],
+   "evidence": "each intermediary adds a fast or manual step",
+   "status": "PASS"
+  },
+  {
+   "source": "sbank",
+   "target": "acct",
+   "kind": "deterministic",
+   "rules": [
+    "P2"
+   ],
+   "evidence": "IBAN prefix = BIC country (100%); IBAN only in IBAN countries",
+   "status": "PASS"
+  },
+  {
+   "source": "otype",
+   "target": "text",
+   "kind": "deterministic",
+   "rules": [
+    "P1b"
+   ],
+   "evidence": "business vs person token grammar, never mixed",
+   "status": "PASS"
+  },
+  {
+   "source": "otype",
+   "target": "anom",
+   "kind": "stochastic",
+   "rules": [
+    "X1",
+    "X4"
+   ],
+   "evidence": "ROMANCE: sender C 100%; CEO: sender B 100%",
+   "status": "PASS"
+  },
+  {
+   "source": "anom",
+   "target": "amt",
+   "kind": "stochastic",
+   "rules": [
+    "X1",
+    "X3"
+   ],
+   "evidence": "romance \u00d71.5 per step; fat finger \u00d7100 / \u00f7100",
+   "status": "PASS"
+  },
+  {
+   "source": "anom",
+   "target": "rbank",
+   "kind": "stochastic",
+   "rules": [
+    "X4"
+   ],
+   "evidence": "CEO / account-replacement \u2192 mule accounts at small banks",
+   "status": "PASS"
+  },
+  {
+   "source": "sbank",
+   "target": "rbank",
+   "kind": "unresolved",
+   "rules": [
+    "G1"
+   ],
+   "evidence": "pairing not independent: \u03c7\u00b2/dof 358; mechanism open",
+   "status": "PASS"
+  },
+  {
+   "source": "rbank",
+   "target": "bcust",
+   "kind": "independent",
+   "rules": [
+    "P4"
+   ],
+   "evidence": "address country = bank country only 0.98%",
+   "status": "PASS"
+  },
+  {
+   "source": "otype",
+   "target": "btype",
+   "kind": "independent",
+   "rules": [
+    "P1b"
+   ],
+   "evidence": "|\u0394P(B)| = 0.0011",
+   "status": "PASS"
+  },
+  {
+   "source": "anom",
+   "target": "ttype",
+   "kind": "independent",
+   "rules": [
+    "X6"
+   ],
+   "evidence": "Cram\u00e9r's V = 0.0032",
+   "status": "PASS"
+  },
+  {
+   "source": "time",
+   "target": "dur",
+   "kind": "independent",
+   "rules": [
+    "D2"
+   ],
+   "evidence": "hour effect 0.003 after bank fixed effects",
+   "status": "PASS"
+  },
+  {
+   "source": "otype",
+   "target": "ttype",
+   "kind": "independent",
+   "rules": [
+    "R1"
+   ],
+   "evidence": "Cram\u00e9r's V = 0.0027",
+   "status": "PASS"
+  },
+  {
+   "source": "rbank",
+   "target": "amt",
+   "kind": "independent",
+   "rules": [
+    "A2"
+   ],
+   "evidence": "beneficiary-country effect sd 0.23 vs ordering 1.09",
+   "status": "PASS"
+  },
+  {
+   "source": "amt",
+   "target": "time",
+   "kind": "confounded",
+   "rules": [
+    "A2",
+    "T1"
+   ],
+   "evidence": "V = 0.022 via sending country (wealth level \u00d7 time zone)",
+   "status": "PASS"
+  },
+  {
+   "source": "amt",
+   "target": "dur",
+   "kind": "confounded",
+   "rules": [
+    "A2",
+    "D1"
+   ],
+   "evidence": "V = 0.024 via sending bank (bank effects on both)",
+   "status": "PASS"
+  },
+  {
+   "source": "calendar",
+   "target": "time",
+   "kind": "unresolved",
+   "rules": [
+    "T4"
+   ],
+   "evidence": "cause of the weekly step levels not identified",
+   "status": "PASS"
+  }
+ ],
+ "legend": {
+  "deterministic": "exact, validated on all rows",
+  "stochastic": "validated probabilistic dependency",
+  "independent": "tested non-edge",
+  "confounded": "association explained by a common driver",
+  "unresolved": "dependency established, mechanism open"
+ },
+ "note": "Edges are generation dependencies consistent with the data, not causal identification."
+}
