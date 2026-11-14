@@ -91,12 +91,18 @@ import sys, os, math, re, json, time, shutil, subprocess, warnings
 from pathlib import Path
 IN_COLAB = "google.colab" in sys.modules
 if IN_COLAB:
-    # the exact library versions the project was built and tested with
-    !pip -q install duckdb==1.5.2 pandas==3.1.0 scipy==1.17.1 scikit-learn==1.8.0 matplotlib==3.10.9 pyarrow==24.0.0 pypdf==6.19.0
+    # The exact library versions the project was built and tested with. pip's log goes to a file: Colab's own
+    # 'google-colab' package pins an older pandas, so pip prints a harmless "dependency conflict" notice on success.
+    print("1/3 Installing the tested library versions (about 1 minute)…", flush=True)
+    !pip -q install duckdb==1.5.2 pandas==3.1.0 scipy==1.17.1 scikit-learn==1.8.0 matplotlib==3.10.9 pyarrow==24.0.0 pypdf==6.19.0 > /tmp/pip.log 2>&1 || (tail -n 25 /tmp/pip.log; echo "pip install FAILED - see the log above")
     # headless Chrome renders the PDF deliverables in Part B (the pipeline uses Edge/Chrome's print-to-PDF)
-    !wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && apt-get -qq install -y /tmp/chrome.deb > /dev/null 2>&1 || echo "Chrome install failed: the PDF steps will be skipped"
+    print("2/3 Installing headless Chrome for the PDF steps (about 1 minute)…", flush=True)
+    !wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && apt-get -qq install -y /tmp/chrome.deb > /dev/null 2>&1 || echo "Chrome install failed: the PDF steps will be skipped, everything else still runs"
+    print("3/3 Connecting Google Drive (approve the pop-up)…", flush=True)
     from google.colab import drive
     drive.mount("/content/drive")
+    import importlib.metadata as md
+    print("ready:", ", ".join(f"{p} {md.version(p)}" for p in ("duckdb", "pandas", "scipy", "scikit-learn", "matplotlib")))
 warnings.filterwarnings("ignore")
 """)
 code(r"""
@@ -114,8 +120,23 @@ from scipy import stats
 pd.set_option("display.width", 160); pd.set_option("display.max_columns", 30)
 plt.rcParams.update({"figure.dpi": 110, "axes.grid": True, "grid.alpha": .3, "axes.spines.top": False, "axes.spines.right": False})
 BLUE, INK, RED, YELLOW, GREY = "#2479D8", "#111827", "#EF5147", "#F4D52E", "#8a8a8a"
-print("duckdb", duckdb.__version__, "| pandas", pd.__version__, "| data file:", Path(DATA_PATH).name, "| found:", os.path.exists(DATA_PATH))
-assert os.path.exists(DATA_PATH), "Set DATA_PATH to the dataset CSV (or payments.parquet) — see the instructions above."
+CSV_NAME = "swift_umdac_datathon_2026_fictitious_payment_data.csv"
+if IN_COLAB and not os.path.exists(DATA_PATH):
+    # not at the default place: look for the CSV (or a shared payments.parquet) in Drive (3 folder levels) and in /content
+    roots = [Path("/content/drive/MyDrive"), Path("/content")]
+    pats = [p + n for n in (CSV_NAME, "payments.parquet") for p in ("", "*/", "*/*/", "*/*/*/")]
+    hits = [h for r in roots if r.exists() for pat in pats for h in r.glob(pat) if "orvanta" not in h.parts]
+    if hits:
+        DATA_PATH = str(hits[0]); print("found the dataset at", DATA_PATH)
+if not os.path.exists(DATA_PATH):
+    print(f'''
+DATASET NOT FOUND — nothing is wrong with the code; the notebook just needs the data file.
+  1. Open https://drive.google.com in a new tab (same Google account as this Colab).
+  2. Drag the file  {CSV_NAME}  (about 5 GB) into "My Drive" and wait until the upload finishes.
+  3. Come back here and click  Runtime → Run all  again.
+(If a teammate shared payments.parquet instead, put it in My Drive — the notebook finds either file.)''')
+    raise SystemExit("Stopped: dataset not found (see the instructions above).")
+print("duckdb", duckdb.__version__, "| pandas", pd.__version__, "| data file:", Path(DATA_PATH).name, "| found: True")
 """)
 code("# Dashboard reference values (full 10M rows), copied from outputs/evidence/validation.json when this notebook was built.\n"
      f"REF = {json.dumps(REF, indent=1)}\nTOL = {json.dumps(TOL)}\nDEFAULT_TOL = {DEFAULT_TOL}\n"
